@@ -1,0 +1,6 @@
+[submodule "external/wayland"]
+	path = external/wayland
+	url = https://github.com/wayland-project/wayland.git
+[submodule "external/kwayland"]
+	path = external/kwayland
+	url = https://github.com/KDE/kwayland.git
