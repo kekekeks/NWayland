@@ -10,30 +10,39 @@ namespace NWayland.CodeGen
     {
         static InvocationExpressionSyntax GenerateWlMessage(WaylandProtocolMessage msg)
         {
-            var argList = new SeparatedSyntaxList<ArgumentSyntax>();
             var signature = new StringBuilder();
+            var ifaceList = new SeparatedSyntaxList<ExpressionSyntax>();
             if (msg.Arguments != null)
             {
                 foreach (var arg in msg.Arguments)
                 {
                     if (arg.AllowNull)
                         signature.Append('?');
+                    if (arg.Type == WaylandArgumentTypes.NewId && arg.Interface == null)
+                        signature.Append("su");
                     signature.Append(WaylandArgumentTypes.NamesToCodes[arg.Type]);
                     if (!string.IsNullOrWhiteSpace(arg.Interface))
-                        argList = argList.Add(Argument(
-                            GetWlInterfaceAddressFor(arg.Interface)));
+                        ifaceList = ifaceList.Add(
+                            GetWlInterfaceAddressFor(arg.Interface));
                     else
-                        argList = argList.Add(Argument(MakeNullLiteralExpression()));
+                        ifaceList = ifaceList.Add(MakeNullLiteralExpression());
                 }
             }
 
-            argList = argList.Insert(0, Argument(MakeLiteralExpression(signature.ToString())));
-            argList = argList.Insert(0, Argument(MakeLiteralExpression(msg.Name)));
+            var argList = ArgumentList(SeparatedList(new[]
+            {
+                Argument(MakeLiteralExpression(msg.Name)),
+                Argument(MakeLiteralExpression(signature.ToString())),
+                Argument(ArrayCreationExpression(ArrayType(ParseTypeName("WlInterface*[]")))
+                    .WithInitializer(InitializerExpression(SyntaxKind.ArrayInitializerExpression,
+                        ifaceList)))
+
+            }));
 
             return InvocationExpression(
                 MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
                     IdentifierName("WlMessage"), IdentifierName("Create")),
-                ArgumentList(argList)
+                argList
             ).WithLeadingTrivia(SyntaxFactory.CarriageReturn);
         }
 

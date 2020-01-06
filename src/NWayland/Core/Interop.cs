@@ -130,7 +130,7 @@ namespace NWayland.Core
         public WlInterface** Types;
 
         private static WlInterface*[] OneNullType = new WlInterface*[] {null};
-        public static WlMessage Create(string name, string signature, params WlInterface*[] types)
+        public static WlMessage Create(string name, string signature, WlInterface*[] types)
         {
             types ??= OneNullType;
             var pTypes = (WlInterface**) Marshal.AllocHGlobal(IntPtr.Size * types.Length);
@@ -156,7 +156,7 @@ namespace NWayland.Core
         public int EventCount;
         public WlMessage* Events;
 
-        public WlInterface* GeneratorAddressOf(ref WlInterface s)
+        public static WlInterface* GeneratorAddressOf(ref WlInterface s)
         {
             fixed (WlInterface* addr = &s)
                 return addr;

@@ -6,7 +6,7 @@ using NWayland.Protocols.Wayland;
 
 namespace SimpleWindow
 {
-    class Program
+    unsafe class Program
     {
         static void Main(string[] args)
         {
@@ -20,8 +20,17 @@ namespace SimpleWindow
 
             var compositor = registryHandler.Bind(WlCompositor.BindFactory, WlCompositor.InterfaceName,
                 WlCompositor.InterfaceVersion);
+            
+            display.Roundtrip();
             var shell = registryHandler.Bind(WlShell.BindFactory, WlShell.InterfaceName, WlShell.InterfaceVersion);
-
+            
+            display.Roundtrip();
+            var surface = compositor.CreateSurface();
+            var shellSurface = shell.GetShellSurface(surface);
+            shellSurface.SetTitle("Test");
+            surface.Commit();
+            display.Dispatch();
+            display.Roundtrip();
         }
     }
 

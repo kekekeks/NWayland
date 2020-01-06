@@ -18,7 +18,6 @@ namespace NWayland.Core
             _data = ArrayPool<byte>.Shared.Rent(len + 1);
             Encoding.UTF8.GetBytes(s, 0, s.Length, _data, 0);
             _data[len] = 0;
-            _data = Encoding.UTF8.GetBytes(s);
             _gcHandle = GCHandle.Alloc(_data, GCHandleType.Pinned);
             handle = _gcHandle.AddrOfPinnedObject();
         }
