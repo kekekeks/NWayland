@@ -12,8 +12,7 @@ namespace NWayland.CodeGen
         EnumDeclarationSyntax CreateEnum(WaylandProtocolEnum en)
         {
             var decl = EnumDeclaration(Pascalize(en.Name + "Enum"))
-                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                .AddBaseListTypes(SimpleBaseType(ParseTypeName("uint")));
+                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
             decl = WithSummary(decl, en.Description);
             if (en.IsBitField)
                 decl = decl.AddAttributeLists(AttributeList(SingletonSeparatedList(
