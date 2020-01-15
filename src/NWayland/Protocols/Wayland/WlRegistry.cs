@@ -12,7 +12,7 @@ namespace NWayland.Protocols.Wayland
             if (iface.Version < version)
                 throw new ArgumentException(
                     $"Requested version {version} of {Marshal.PtrToStringAnsi((IntPtr) iface.Name)} is not supported by this version of NWayland. Bindings were generated for version {iface.Version}");
-            var args = new WlArgument[]
+            var args = stackalloc WlArgument[]
             {
                 name,
                 (IntPtr)iface.Name,

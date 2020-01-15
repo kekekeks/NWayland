@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -26,10 +27,10 @@ namespace NWayland.Core
         public static extern void wl_proxy_destroy(IntPtr proxy);
 
         [DllImport(Wayland)]
-        public static extern void wl_proxy_marshal_array(IntPtr p, uint opcode, WlArgument[] args);
+        public static extern void wl_proxy_marshal_array(IntPtr p, uint opcode, WlArgument* args);
 
         [DllImport(Wayland)]
-        public static extern IntPtr wl_proxy_marshal_array_constructor(IntPtr p, uint opcode, WlArgument[] args,
+        public static extern IntPtr wl_proxy_marshal_array_constructor(IntPtr p, uint opcode, WlArgument* args,
             ref WlInterface iface);
 
         [DllImport(Wayland)]
@@ -199,7 +200,42 @@ namespace NWayland.Core
         public static implicit operator WlArgument(IntPtr value) => new WlArgument {IntPtr = value};
         public static implicit operator WlArgument(WlProxy value) => new WlArgument {IntPtr = value.Handle};
         public static implicit operator WlArgument(SafeHandle value) => new WlArgument {IntPtr = value?.DangerousGetHandle() ?? IntPtr.Zero};
+        public static implicit operator WlArgument(WlArray* value) => new WlArgument {IntPtr = (IntPtr)value};
 
         public static readonly WlArgument NewId;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe ref struct WlArray
+    {
+        public IntPtr Size;
+        public IntPtr Alloc;
+        public IntPtr Data;
+
+        public static Span<T> SpanFromWlArrayPtr<T>(IntPtr wlArrayPointer)
+        {
+            if(wlArrayPointer == IntPtr.Zero)
+                return Span<T>.Empty;
+            return ((WlArray*) wlArrayPointer.ToPointer())->AsSpan<T>();
+        }
+        
+        public Span<T> AsSpan<T>()
+        {
+            var size = Size.ToInt32() / Unsafe.SizeOf<T>();
+            if(size == 0)
+                return Span<T>.Empty;
+            return new Span<T>(Data.ToPointer(), size);
+        }
+
+        public static WlArray FromPointer<T>(T* ptr, int count) where T : unmanaged
+        {
+            var size = new IntPtr(Unsafe.SizeOf<T>() * count);
+            return new WlArray
+            {
+                Size = size,
+                Alloc = size,
+                Data = (IntPtr) ptr
+            };
+        }
     }
 }

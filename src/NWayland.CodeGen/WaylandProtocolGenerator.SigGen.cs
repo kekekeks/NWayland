@@ -6,9 +6,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace NWayland.CodeGen
 {
-    public static partial class WaylandProtocolGenerator
+    public partial class WaylandProtocolGenerator
     {
-        static InvocationExpressionSyntax GenerateWlMessage(WaylandProtocolMessage msg)
+        InvocationExpressionSyntax GenerateWlMessage(WaylandProtocolMessage msg)
         {
             var signature = new StringBuilder();
             if (msg.Since != 0)
@@ -48,7 +48,7 @@ namespace NWayland.CodeGen
             ).WithLeadingTrivia(SyntaxFactory.CarriageReturn);
         }
 
-        static ArgumentSyntax GenerateWlMessageList(in WaylandProtocolMessage[] messages)
+        ArgumentSyntax GenerateWlMessageList(in WaylandProtocolMessage[] messages)
         {
             var elements = new SeparatedSyntaxList<ExpressionSyntax>();
             foreach (var msg in messages)
@@ -59,7 +59,7 @@ namespace NWayland.CodeGen
         }
         
         
-        static ClassDeclarationSyntax WithSignature(this ClassDeclarationSyntax cl, WaylandProtocolInterface iface)
+        ClassDeclarationSyntax WithSignature(ClassDeclarationSyntax cl, WaylandProtocolInterface iface)
         {
             var attr = AttributeList(SingletonSeparatedList(
                 Attribute(

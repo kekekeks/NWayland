@@ -5,7 +5,7 @@ namespace NWayland.CodeGen
 {
     public partial class WaylandProtocolGenerator
     {
-        static ClassDeclarationSyntax WithFactory(this ClassDeclarationSyntax cl, WaylandProtocolInterface iface)
+        ClassDeclarationSyntax WithFactory(ClassDeclarationSyntax cl, WaylandProtocolInterface iface)
         {
             if (iface.Name == "wl_display" || iface.Name == "wl_registry")
                 return cl;

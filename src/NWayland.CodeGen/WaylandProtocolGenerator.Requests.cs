@@ -10,13 +10,14 @@ namespace NWayland.CodeGen
 {
     public partial class WaylandProtocolGenerator
     {
-        static MethodDeclarationSyntax CreateMethod(WaylandProtocolRequest request, int index)
+        MethodDeclarationSyntax CreateMethod(WaylandProtocol protocol, WaylandProtocolInterface iface,
+            WaylandProtocolRequest request, int index)
         {
             var newIdArgument = request.Arguments?.FirstOrDefault(a => a.Type == WaylandArgumentTypes.NewId);
             if (newIdArgument != null && newIdArgument.Interface == null)
                 return null;
             var ctorType = newIdArgument?.Interface;
-            var dotNetCtorType = ctorType == null ? "void" : Pascalize(ctorType);
+            var dotNetCtorType = ctorType == null ? "void" : GetWlInterfaceTypeName(ctorType);
             
             var method = MethodDeclaration(
                 ParseTypeName(dotNetCtorType), Pascalize(request.Name));
@@ -24,7 +25,9 @@ namespace NWayland.CodeGen
             var plist = new SeparatedSyntaxList<ParameterSyntax>();
             var arglist = new SeparatedSyntaxList<ExpressionSyntax>();
             var statements = new SeparatedSyntaxList<StatementSyntax>();
-
+            var callStatements = new SeparatedSyntaxList<StatementSyntax>();
+            var fixedDeclarations = new List<VariableDeclarationSyntax>();
+            
             if (request.Since > 0)
             {
                 statements = statements.Add(IfStatement(
@@ -85,13 +88,38 @@ namespace NWayland.CodeGen
                     else if (arg.Type == WaylandArgumentTypes.Object)
                     {
                         nullCheck = true;
-                        parameterType = ParseTypeName(Pascalize(arg.Interface));
+                        parameterType = ParseTypeName(GetWlInterfaceTypeName(arg.Interface));
                         arglist = arglist.Add(IdentifierName(argName));
                     }
                     else if (arg.Type == WaylandArgumentTypes.Array)
                     {
-                        //TODO: implement
-                        return null;
+                        if (arg.AllowNull)
+                            throw new NotSupportedException(
+                                "Wrapping nullable arrays is currently not supported");
+                        var arrayElementType = _hints.GetTypeNameForArray(protocol.Name, iface.Name, request.Name, arg.Name); 
+                        parameterType = ParseTypeName("ReadOnlySpan<" + arrayElementType + ">");
+                        var pointerName = "__pointer__" + argName.TrimStart('@');
+                        var tempName = "__marshalled__" + argName.TrimStart('@');
+                        fixedDeclarations.Add(VariableDeclaration(ParseTypeName(arrayElementType + "*"),
+                            SingletonSeparatedList(VariableDeclarator(pointerName)
+                                .WithInitializer(EqualsValueClause(IdentifierName(argName))))));
+
+                        callStatements = callStatements.Add(LocalDeclarationStatement(VariableDeclaration(ParseTypeName("var"))
+                            .WithVariables(SingletonSeparatedList(VariableDeclarator(tempName)
+                                .WithInitializer(EqualsValueClause(
+                                    InvocationExpression(MemberAccess(ParseTypeName("NWayland.Core.WlArray"),
+                                        "FromPointer"), ArgumentList(SeparatedList(new[]
+                                        {
+                                            Argument(IdentifierName(pointerName)),
+                                            Argument(MemberAccess(IdentifierName(argName), "Length"))
+                                        }
+                                    ))))
+
+                                )))));
+
+                        arglist = arglist.Add(PrefixUnaryExpression(SyntaxKind.AddressOfExpression,
+                            IdentifierName(tempName)));
+
                     }
 
                     if (parameterType != null)
@@ -110,12 +138,17 @@ namespace NWayland.CodeGen
                                             Argument(MakeLiteralExpression(argName.TrimStart('@')))))))));
                 }
 
+            callStatements = callStatements.Add(LocalDeclarationStatement(VariableDeclaration(ParseTypeName("WlArgument*"))
+                .WithVariables(SingletonSeparatedList(VariableDeclarator("__args")
+                    .WithInitializer(EqualsValueClause(StackAllocArrayCreationExpression(
+                        ArrayType(ParseTypeName("WlArgument[]")),
+                        InitializerExpression(SyntaxKind.ArrayInitializerExpression, arglist))))))));
+            
             var marshalArgs = SeparatedList(new[]
             {
                 Argument(MemberAccess( IdentifierName("this"), "Handle")),
                 Argument(MakeLiteralExpression(index)),
-                Argument(ArrayCreationExpression(ArrayType(ParseTypeName("WlArgument[]")),
-                    InitializerExpression(SyntaxKind.ArrayInitializerExpression, arglist)))
+                Argument(IdentifierName("__args"))
             });
             if (ctorType != null)
                 marshalArgs = marshalArgs.Add(Argument(GetWlInterfaceRefFor(ctorType)));
@@ -127,14 +160,16 @@ namespace NWayland.CodeGen
                         : "wl_proxy_marshal_array_constructor")),
                 ArgumentList(marshalArgs));
 
+            
+            
             if (ctorType == null)
-                statements = statements.Add(ExpressionStatement(callExpr));
+                callStatements = callStatements.Add(ExpressionStatement(callExpr));
             else
             {
-                statements = statements.Add(LocalDeclarationStatement(VariableDeclaration(ParseTypeName("var"))
+                callStatements = callStatements.Add(LocalDeclarationStatement(VariableDeclaration(ParseTypeName("var"))
                     .WithVariables(SingletonSeparatedList(
                         VariableDeclarator("__ret").WithInitializer(EqualsValueClause(callExpr))))));
-                statements = statements.Add(ReturnStatement(ConditionalExpression(BinaryExpression(
+                callStatements = callStatements.Add(ReturnStatement(ConditionalExpression(BinaryExpression(
                         SyntaxKind.EqualsExpression, IdentifierName("__ret"),
                         MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, IdentifierName("IntPtr"),
                             IdentifierName("Zero"))),
@@ -148,10 +183,21 @@ namespace NWayland.CodeGen
                         }))))));
             }
 
-            method = method.WithParameterList(ParameterList(plist))
-                .WithBody(Block(statements))
-                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                .WithSummary(request.Description);
+            if (fixedDeclarations.Count == 0)
+                statements = statements.AddRange(callStatements);
+            else
+            {
+                var callBlock = (StatementSyntax) Block(callStatements);
+                fixedDeclarations.Reverse();
+                foreach (var fd in fixedDeclarations)
+                    callBlock = FixedStatement(fd, callBlock);
+                statements = statements.Add(callBlock);
+            }
+
+            method = WithSummary(method.WithParameterList(ParameterList(plist))
+                    .WithBody(Block(statements))
+                    .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword))),
+                request.Description);
 
             if (request.Type == "destructor")
             {
@@ -169,13 +215,15 @@ namespace NWayland.CodeGen
         }
 
 
-        static ClassDeclarationSyntax WithRequests(this ClassDeclarationSyntax cl, WaylandProtocolInterface iface)
+        ClassDeclarationSyntax WithRequests(ClassDeclarationSyntax cl,
+            WaylandProtocol protocol,
+            WaylandProtocolInterface iface)
         {
             if (iface.Requests == null)
                 return cl;
             for (var idx = 0; idx < iface.Requests.Length; idx++)
             {
-                var method = CreateMethod(iface.Requests[idx], idx);
+                var method = CreateMethod(protocol, iface, iface.Requests[idx], idx);
                 if (method != null)
                     cl = cl.AddMembers(method);
             }

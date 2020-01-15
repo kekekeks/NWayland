@@ -9,7 +9,9 @@ namespace NWayland.CodeGen
     {
 
         
-        static ClassDeclarationSyntax WithEvents(this ClassDeclarationSyntax cl, WaylandProtocolInterface iface)
+        ClassDeclarationSyntax WithEvents(ClassDeclarationSyntax cl, 
+            WaylandProtocol protocol,
+            WaylandProtocolInterface iface)
         {
             var evs = iface.Events ?? Array.Empty<WaylandProtocolMessage>();
             var eventInterface = InterfaceDeclaration("IEvents")
@@ -25,7 +27,7 @@ namespace NWayland.CodeGen
                 var handlerParameters = new SeparatedSyntaxList<ParameterSyntax>();
                 var arguments = new SeparatedSyntaxList<ArgumentSyntax>();
                 handlerParameters = handlerParameters.Add(Parameter(Identifier("eventSender"))
-                    .WithType(ParseTypeName(Pascalize(iface.Name))));
+                    .WithType(ParseTypeName(GetWlInterfaceTypeName(iface.Name))));
                 arguments = arguments.Add(Argument(IdentifierName("this")));
 
                 var eargs = ev.Arguments ?? Array.Empty<WaylandProtocolArgument>();
@@ -75,7 +77,7 @@ namespace NWayland.CodeGen
                     {
                         var parameterTypeString = arg.Interface == null
                             ? "WlProxy"
-                            : Pascalize(arg.Interface);
+                            : GetWlInterfaceTypeName(arg.Interface);
                         parameterType = ParseTypeName(parameterTypeString);
                         argument = InvocationExpression(MemberAccess(ParseTypeName("WlProxy"),
                                 "FromNative<" + parameterTypeString + ">"),
@@ -83,9 +85,16 @@ namespace NWayland.CodeGen
                     }
                     else if (arg.Type == WaylandArgumentTypes.Array)
                     {
-                        //TODO: implement
-                        parameterType = ParseTypeName("object[]");
-                        argument = MakeNullLiteralExpression();
+                        var arrayElementType = _hints.GetTypeNameForArray(protocol.Name, iface.Name, ev.Name, arg.Name);
+                        if (arg.AllowNull)
+                            throw new NotSupportedException(
+                                "Wrapping nullable arrays is currently not supported");
+                        
+                        parameterType = ParseTypeName("ReadOnlySpan<" + arrayElementType + ">");
+                        argument = InvocationExpression(
+                            MemberAccess(ParseTypeName("NWayland.Core.WlArray"),
+                                "SpanFromWlArrayPtr<" + arrayElementType + ">"),
+                            ArgumentList(SingletonSeparatedList(Argument(MemberAccess(argument, "IntPtr")))));
                     }
                     handlerParameters = handlerParameters.Add(Parameter(Identifier(argName)).WithType(parameterType));
                     arguments = arguments.Add(Argument(argument));

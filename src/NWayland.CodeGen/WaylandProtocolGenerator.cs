@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,16 +11,24 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace NWayland.CodeGen
 {
-    public static partial class WaylandProtocolGenerator
+    public partial class WaylandProtocolGenerator
     {
-        public static string Generate(string xmlText)
+        private readonly WaylandGeneratorHints _hints;
+        private readonly Dictionary<string, string> _protocolNames = new Dictionary<string, string>();
+        public WaylandProtocolGenerator(List<WaylandProtocol> allProtocols, WaylandGeneratorHints hints)
         {
-            var protocol =
-                (WaylandProtocol) new XmlSerializer(typeof(WaylandProtocol)).Deserialize(new StringReader(xmlText));
-            return Generate(protocol);
+            _hints = hints;
+            foreach(var p in allProtocols)
+            foreach (var i in p.Interfaces)
+            {
+                var name = ProtocolNamespace(p.Name) + "." + Pascalize(i.Name);
+                if(_protocolNames.ContainsKey(i.Name))
+                    throw new ArgumentException($"Can't add {i.Name} from {p.Name}, {i.Name} is already associated to {_protocolNames[i.Name]}");
+                _protocolNames.Add(i.Name, name);
+            }
         }
         
-        public static string Generate(WaylandProtocol protocol)
+        public string Generate(WaylandProtocol protocol)
         {
             
             var unit = CompilationUnit();
@@ -35,7 +45,7 @@ namespace NWayland.CodeGen
         }
 
         
-        static CompilationUnitSyntax Generate(CompilationUnitSyntax code, WaylandProtocol protocol)
+        CompilationUnitSyntax Generate(CompilationUnitSyntax code, WaylandProtocol protocol)
         {
             code = code.AddUsings(UsingDirective(IdentifierName("System")))
                 .AddUsings(UsingDirective(IdentifierName("System.Collections.Generic")))
@@ -57,12 +67,12 @@ namespace NWayland.CodeGen
                         Token(SyntaxKind.UnsafeKeyword),
                         Token(SyntaxKind.PartialKeyword)))
                     .AddBaseListTypes(
-                        SimpleBaseType(SyntaxFactory.ParseTypeName("NWayland.Core.WlProxy")))
-                    .WithSummary(iface.Description)
-                    .WithSignature(iface)
-                    .WithRequests(iface)
-                    .WithEvents(iface)
-                    .WithFactory(iface)
+                        SimpleBaseType(SyntaxFactory.ParseTypeName("NWayland.Core.WlProxy")));
+                cl = WithSummary(cl, iface.Description);
+                cl = WithSignature(cl, iface);
+                cl = WithRequests(cl, protocol, iface);
+                cl = WithEvents(cl, protocol, iface);
+                cl = WithFactory(cl, iface)
                     .AddMembers(DeclareConstant("string", "InterfaceName", MakeLiteralExpression(iface.Name)))
                     .AddMembers(DeclareConstant("int", "InterfaceVersion", MakeLiteralExpression(iface.Version)));
                 

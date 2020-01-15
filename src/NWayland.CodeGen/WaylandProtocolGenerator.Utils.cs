@@ -8,9 +8,9 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace NWayland.CodeGen
 {
-    public static partial class WaylandProtocolGenerator
+    public partial class WaylandProtocolGenerator
     {
-        static string Pascalize(string name, bool camel = false)
+        public string Pascalize(string name, bool camel = false)
         {
             var upperizeNext = !camel;
             var sb = new StringBuilder(name.Length);
@@ -34,14 +34,10 @@ namespace NWayland.CodeGen
             return sb.ToString();
         }
 
-        static string ProtocolNamespace(string protocol) => $"NWayland.Protocols.{Pascalize(protocol)}";
-        static NameSyntax ProtocolNamespaceSyntax(string protocol) => IdentifierName(ProtocolNamespace(protocol));
+        string ProtocolNamespace(string protocol) => $"NWayland.Protocols.{Pascalize(protocol)}";
+        NameSyntax ProtocolNamespaceSyntax(string protocol) => IdentifierName(ProtocolNamespace(protocol));
         
-        static string FullInterfaceName(string protocol, string name) =>
-            $"NWayland.Protocols.{Pascalize(protocol)}.{Pascalize(name)}";
-        
-        
-        static T WithSummary<T>(this T member, WaylandProtocolDescription description) where T : MemberDeclarationSyntax
+        T WithSummary<T>(T member, WaylandProtocolDescription description) where T : MemberDeclarationSyntax
         {
             if (string.IsNullOrWhiteSpace(description?.Value))
                 return member;
@@ -60,22 +56,25 @@ namespace NWayland.CodeGen
                 Trivia(DocumentationComment(summary, XmlText("\n")))));
         }
 
-        static LiteralExpressionSyntax MakeLiteralExpression(string literal)
+        LiteralExpressionSyntax MakeLiteralExpression(string literal)
             => LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(literal));
         
-        static LiteralExpressionSyntax MakeLiteralExpression(int literal)
+        LiteralExpressionSyntax MakeLiteralExpression(int literal)
             => LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(literal));
 
-        static LiteralExpressionSyntax MakeNullLiteralExpression() => LiteralExpression(
+        LiteralExpressionSyntax MakeNullLiteralExpression() => LiteralExpression(
             SyntaxKind.NullLiteralExpression,
             Token(SyntaxKind.NullKeyword));
 
-        static RefExpressionSyntax GetWlInterfaceRefFor(string wlTypeName)
+        string GetWlInterfaceTypeName(string wlTypeName) => _protocolNames[wlTypeName];
+        
+        RefExpressionSyntax GetWlInterfaceRefFor(string wlTypeName)
             => RefExpression(
                 MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
-                    IdentifierName(Pascalize(wlTypeName)),
+                    IdentifierName(GetWlInterfaceTypeName(wlTypeName)),
                     IdentifierName("WlInterface")));
-        static InvocationExpressionSyntax GetWlInterfaceAddressFor(string wlTypeName)
+        
+        InvocationExpressionSyntax GetWlInterfaceAddressFor(string wlTypeName)
         {
             return InvocationExpression(MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
@@ -84,12 +83,12 @@ namespace NWayland.CodeGen
                     GetWlInterfaceRefFor(wlTypeName)))));
         }
 
-        static MemberAccessExpressionSyntax MemberAccess(ExpressionSyntax expr, string identifier) =>
+        MemberAccessExpressionSyntax MemberAccess(ExpressionSyntax expr, string identifier) =>
             MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, expr, IdentifierName(identifier));
 
-        static SyntaxToken Semicolon() => Token(SyntaxKind.SemicolonToken);
+        SyntaxToken Semicolon() => Token(SyntaxKind.SemicolonToken);
 
-        static FieldDeclarationSyntax DeclareConstant(string type, string name, LiteralExpressionSyntax value)
+        FieldDeclarationSyntax DeclareConstant(string type, string name, LiteralExpressionSyntax value)
             => FieldDeclaration(
                     VariableDeclaration(ParseTypeName(type),
                         SingletonSeparatedList(
