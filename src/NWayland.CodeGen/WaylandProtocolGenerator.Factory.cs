@@ -23,6 +23,7 @@ namespace NWayland.CodeGen
                     .WithParameterList(ParameterList(SeparatedList(new[]
                     {
                         Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
+                        Parameter(Identifier("version")).WithType(ParseTypeName("int")),
                         Parameter(Identifier("display")).WithType(ParseTypeName("WlDisplay")),
                     })))
                     .WithBody(Block(ReturnStatement(
@@ -30,6 +31,7 @@ namespace NWayland.CodeGen
                             .WithArgumentList(ArgumentList(SeparatedList(new[]
                             {
                                 Argument(IdentifierName("handle")),
+                                Argument(IdentifierName("version")),
                                 Argument(IdentifierName("display"))
                             })))
                     )))

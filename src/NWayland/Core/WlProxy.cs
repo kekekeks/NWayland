@@ -5,19 +5,26 @@ using NWayland.Protocols.Wayland;
 
 namespace NWayland.Core
 {
-    public abstract unsafe class WlProxy
+    public abstract unsafe class WlProxy : IDisposable
     {
+        public int Version { get; }
         public IntPtr Handle { get; }
         public WlDisplay Display { get; protected set; }
-
-        public WlProxy(IntPtr handle, WlDisplay display)
+        private readonly uint _id;
+        public WlProxy(IntPtr handle, int version, WlDisplay display)
         {
+            Version = version;
             Handle = handle;
             Display = display;
+            
             if (this is WlDisplay d)
                 Display = d;
             else
-                Interop.RegisterProxy(this);
+            {
+                if (display == null)
+                    throw new ArgumentNullException(nameof(display));
+                _id = Interop.RegisterProxy(this);
+            }
         }
 
         protected abstract WlInterface* GetWlInterface();
@@ -53,6 +60,31 @@ namespace NWayland.Core
         protected static T FromNative<T>(IntPtr proxy) where T : WlProxy
         {
             return Interop.FindByNative(proxy) as T;
+        }
+
+        ~WlProxy()
+        {
+            Console.Error.WriteLine(
+                $"Finalized an undisposed {GetType().FullName}. This is an application error and will result in a memory leak. It's not thread safe to destroy wl_proxy objects from arbitrary thread since it can lead to fatal memory corruption.");
+        }
+
+        protected virtual void CallWaylandDestructor()
+        {
+            
+        }
+        
+        public void Dispose()
+        {
+            if (this is WlDisplay wlDisplay)
+            {
+                //TODO: free all associated objects
+            }
+            else
+            {
+                CallWaylandDestructor();
+                Interop.UnregisterProxy(_id);
+                Interop.wl_proxy_destroy(Handle);
+            }
         }
     }
 }

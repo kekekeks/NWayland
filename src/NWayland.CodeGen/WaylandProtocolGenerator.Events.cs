@@ -58,6 +58,7 @@ namespace NWayland.CodeGen
                                 ArgumentList(SeparatedList(new[]
                                     {
                                         Argument(MemberAccess(argument, "IntPtr")),
+                                        Argument(IdentifierName("Version")),
                                         Argument(IdentifierName("Display"))
                                     }
                                 )));

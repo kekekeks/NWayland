@@ -75,6 +75,7 @@ namespace NWayland.CodeGen
                             SeparatedList(new[]
                             {
                                 Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
+                                Parameter(Identifier("version")).WithType(ParseTypeName("int")),
                                 Parameter(Identifier("display"))
                                     .WithType(ParseTypeName("NWayland.Protocols.Wayland.WlDisplay")),
                             }))).WithBody(Block())
@@ -82,7 +83,8 @@ namespace NWayland.CodeGen
                             ArgumentList(SeparatedList(new[]
                             {
                                 Argument(IdentifierName("handle")),
-                                Argument(IdentifierName("display")),
+                                Argument(IdentifierName("version")),
+                                Argument(IdentifierName("display"))
                             }))));
                     cl = cl.AddMembers(ctor);
                 }

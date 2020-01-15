@@ -4,3 +4,6 @@
 [submodule "external/kwayland"]
 	path = external/kwayland
 	url = https://github.com/KDE/kwayland.git
+[submodule "external/wayland-protocols"]
+	path = external/wayland-protocols
+	url = https://github.com/wayland-project/wayland-protocols.git

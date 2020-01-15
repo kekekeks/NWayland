@@ -70,13 +70,21 @@ namespace SimpleWindow
             _globals.Remove(name);
         }
 
-        public T Bind<T>(IBindFactory<T> factory, string iface, int minimumVersion) where T : WlProxy
+        public unsafe T Bind<T>(IBindFactory<T> factory, string iface, int? version) where T : WlProxy
         {
-            var glob = GetGlobals().Where(g => g.Interface == iface && g.Version >= minimumVersion)
-                .OrderBy(x => x.Version).FirstOrDefault();
+            var glob = GetGlobals().FirstOrDefault(g => g.Interface == iface);
             if (glob == null)
-                throw new KeyNotFoundException($"Unable to find {iface} with version at least of {minimumVersion}");
-            return _registry.Bind(glob.Name, factory);
+                throw new NotSupportedException($"Unable to find {iface} in the registry");
+
+            version ??= factory.GetInterface()->Version;
+            if (version > factory.GetInterface()->Version)
+                throw new ArgumentException($"Version {version} is not supported");
+            
+            if (glob.Version < version)
+                throw new NotSupportedException(
+                    $"Compositor doesn't support {version} of {iface}, only {glob.Version} is supported");
+            
+            return _registry.Bind(glob.Name, factory, version.Value);
         }
     }
 }

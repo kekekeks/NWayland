@@ -76,7 +76,7 @@ namespace NWayland.Core
 
         private static readonly WlProxyDispatcherDelegate Dispatcher = WlProxyDispatcher;
         
-        public static void RegisterProxy(WlProxy wlProxy)
+        public static uint RegisterProxy(WlProxy wlProxy)
         {
             lock (Proxies)
             {
@@ -84,6 +84,7 @@ namespace NWayland.Core
                 var idp = (IntPtr)new UIntPtr(id).ToPointer();
                 wl_proxy_add_dispatcher(wlProxy.Handle, Dispatcher, idp, idp);
                 Proxies[id] = new WeakReference<WlProxy>(wlProxy);
+                return id;
             }
         }
 
@@ -197,7 +198,7 @@ namespace NWayland.Core
         public static implicit operator WlArgument(uint value) => new WlArgument {UInt32 = value};
         public static implicit operator WlArgument(IntPtr value) => new WlArgument {IntPtr = value};
         public static implicit operator WlArgument(WlProxy value) => new WlArgument {IntPtr = value.Handle};
-        public static implicit operator WlArgument(SafeHandle value) => new WlArgument {IntPtr = value.DangerousGetHandle()};
+        public static implicit operator WlArgument(SafeHandle value) => new WlArgument {IntPtr = value?.DangerousGetHandle() ?? IntPtr.Zero};
 
         public static readonly WlArgument NewId;
     }

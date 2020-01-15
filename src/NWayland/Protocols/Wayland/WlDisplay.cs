@@ -20,7 +20,7 @@ namespace NWayland.Protocols.Wayland
 
         public event EventHandler<UnhandledEventHandlerExceptionEventArgs> UnhandledEventHandlerException;
 
-        WlDisplay(IntPtr handle) : base(handle, null)
+        WlDisplay(IntPtr handle) : base(handle, 1, null)
         {
         }
 

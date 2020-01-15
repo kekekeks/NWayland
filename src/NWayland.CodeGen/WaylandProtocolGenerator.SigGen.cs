@@ -11,6 +11,8 @@ namespace NWayland.CodeGen
         static InvocationExpressionSyntax GenerateWlMessage(WaylandProtocolMessage msg)
         {
             var signature = new StringBuilder();
+            if (msg.Since != 0)
+                signature.Append(msg.Since);
             var ifaceList = new SeparatedSyntaxList<ExpressionSyntax>();
             if (msg.Arguments != null)
             {

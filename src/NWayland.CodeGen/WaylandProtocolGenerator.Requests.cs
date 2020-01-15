@@ -17,17 +17,34 @@ namespace NWayland.CodeGen
                 return null;
             var ctorType = newIdArgument?.Interface;
             var dotNetCtorType = ctorType == null ? "void" : Pascalize(ctorType);
+            
             var method = MethodDeclaration(
                 ParseTypeName(dotNetCtorType), Pascalize(request.Name));
 
             var plist = new SeparatedSyntaxList<ParameterSyntax>();
             var arglist = new SeparatedSyntaxList<ExpressionSyntax>();
             var statements = new SeparatedSyntaxList<StatementSyntax>();
+
+            if (request.Since > 0)
+            {
+                statements = statements.Add(IfStatement(
+                    BinaryExpression(SyntaxKind.LessThanExpression,
+                        IdentifierName("Version"), MakeLiteralExpression(request.Since))
+                    ,
+                    request.Type == "destructor"
+                        ? (StatementSyntax) ReturnStatement()
+                        : ThrowStatement(ObjectCreationExpression(ParseTypeName("System.InvalidOperationException"))
+                            .WithArgumentList(
+                                ArgumentList(SingletonSeparatedList(Argument(MakeLiteralExpression(
+                                    $"Request {request.Name} is only supported since version {request.Since}"))))))));
+            }
+            
             if (request.Arguments != null)
 
                 foreach (var arg in request.Arguments ?? Array.Empty<WaylandProtocolArgument>())
                 {
                     TypeSyntax parameterType = null;
+                    var nullCheck = false;
                     var argName = "@" + Pascalize(arg.Name, true);
                     if (arg.Type == WaylandArgumentTypes.Int32 
                         || arg.Type == WaylandArgumentTypes.Fixed
@@ -48,6 +65,7 @@ namespace NWayland.CodeGen
                     }
                     else if (arg.Type == WaylandArgumentTypes.String)
                     {
+                        nullCheck = true;
                         parameterType = ParseTypeName("System.String");
                         var tempName = "__marshalled__" + argName.TrimStart('@');
                         var bufferType = ParseTypeName("NWayland.Core.NWaylandMarshalledString");
@@ -66,6 +84,7 @@ namespace NWayland.CodeGen
                     }
                     else if (arg.Type == WaylandArgumentTypes.Object)
                     {
+                        nullCheck = true;
                         parameterType = ParseTypeName(Pascalize(arg.Interface));
                         arglist = arglist.Add(IdentifierName(argName));
                     }
@@ -79,6 +98,16 @@ namespace NWayland.CodeGen
                     {
                         plist = plist.Add(Parameter(Identifier(argName)).WithType(parameterType));
                     }
+
+                    if (nullCheck)
+                        statements = statements.Insert(0, IfStatement(
+                            BinaryExpression(SyntaxKind.EqualsExpression, IdentifierName(argName),
+                                MakeNullLiteralExpression()),
+                            ThrowStatement(ObjectCreationExpression(ParseTypeName("System.ArgumentNullException"))
+                                .WithArgumentList(
+                                    ArgumentList(
+                                        SingletonSeparatedList(
+                                            Argument(MakeLiteralExpression(argName.TrimStart('@')))))))));
                 }
 
             var marshalArgs = SeparatedList(new[]
@@ -114,6 +143,7 @@ namespace NWayland.CodeGen
                         ArgumentList(SeparatedList(new[]
                         {
                             Argument(IdentifierName("__ret")),
+                            Argument(IdentifierName("Version")),
                             Argument(IdentifierName("Display"))
                         }))))));
             }
@@ -122,6 +152,17 @@ namespace NWayland.CodeGen
                 .WithBody(Block(statements))
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
                 .WithSummary(request.Description);
+
+            if (request.Type == "destructor")
+            {
+                method = method
+                    .WithIdentifier(Identifier("CallWaylandDestructor"))
+                    .WithModifiers(TokenList(
+                        Token(SyntaxKind.ProtectedKeyword),
+                        Token(SyntaxKind.SealedKeyword),
+                        Token(SyntaxKind.OverrideKeyword)
+                    ));
+            }
 
 
             return method;
