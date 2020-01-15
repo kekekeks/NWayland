@@ -1,9 +1,10 @@
 using System;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
+using NWayland.Interop;
 using NWayland.Protocols.Wayland;
 
-namespace NWayland.Core
+namespace NWayland.Protocols.Wayland
 {
     public abstract unsafe class WlProxy : IDisposable
     {
@@ -23,7 +24,7 @@ namespace NWayland.Core
             {
                 if (display == null)
                     throw new ArgumentNullException(nameof(display));
-                _id = Interop.RegisterProxy(this);
+                _id = LibWayland.RegisterProxy(this);
             }
         }
 
@@ -59,7 +60,7 @@ namespace NWayland.Core
 
         protected static T FromNative<T>(IntPtr proxy) where T : WlProxy
         {
-            return Interop.FindByNative(proxy) as T;
+            return LibWayland.FindByNative(proxy) as T;
         }
 
         ~WlProxy()
@@ -82,8 +83,8 @@ namespace NWayland.Core
             else
             {
                 CallWaylandDestructor();
-                Interop.UnregisterProxy(_id);
-                Interop.wl_proxy_destroy(Handle);
+                LibWayland.UnregisterProxy(_id);
+                LibWayland.wl_proxy_destroy(Handle);
             }
         }
     }

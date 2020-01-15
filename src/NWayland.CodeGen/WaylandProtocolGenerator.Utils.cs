@@ -34,7 +34,7 @@ namespace NWayland.CodeGen
             return sb.ToString();
         }
 
-        string ProtocolNamespace(string protocol) => $"NWayland.Protocols.{Pascalize(protocol)}";
+        string ProtocolNamespace(string protocol) => _protocolNamespaces[protocol];
         NameSyntax ProtocolNamespaceSyntax(string protocol) => IdentifierName(ProtocolNamespace(protocol));
         
         T WithSummary<T>(T member, WaylandProtocolDescription description) where T : MemberDeclarationSyntax
@@ -66,7 +66,7 @@ namespace NWayland.CodeGen
             SyntaxKind.NullLiteralExpression,
             Token(SyntaxKind.NullKeyword));
 
-        string GetWlInterfaceTypeName(string wlTypeName) => _protocolNames[wlTypeName];
+        string GetWlInterfaceTypeName(string wlTypeName) => _protocolFullNames[wlTypeName];
         
         RefExpressionSyntax GetWlInterfaceRefFor(string wlTypeName)
             => RefExpression(

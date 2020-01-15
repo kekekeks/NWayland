@@ -14,8 +14,7 @@ namespace NWayland.CodeGen
             AutoGen();
             
         }
-
-
+        
         static void AutoGen()
         {
             var root = typeof(Program).Assembly.GetModules()[0].FullyQualifiedName;
@@ -35,30 +34,48 @@ namespace NWayland.CodeGen
                 return glob.Select(x => Path.Combine(subRoot, x));
 
             }
-            var generatedDir = GetPath("src", "NWayland", "Generated");
-            if(Directory.Exists(generatedDir))
-                Directory.Delete(generatedDir, true);
-            Directory.CreateDirectory(generatedDir);
-
             
+            var coreProtocols = new List<string>();
+            var kdeProtocols = new List<string>();
             
-            var protocols = new List<string>();
-            protocols.Add(GetPath("external", "wayland", "protocol", "wayland.xml"));
-            protocols.AddRange(GlobPath("external", "wayland-protocols", "**/*.xml"));
-            protocols.AddRange(GlobPath("external", "kwayland", "src", "client", "protocols", "**/*.xml"));
+            coreProtocols.Add(GetPath("external", "wayland", "protocol", "wayland.xml"));
+            coreProtocols.AddRange(GlobPath("external", "wayland-protocols", "**/*.xml"));
             var hints = ProtocolHintsConfiguration.GetGeneratorHints();
-            var allProtocols = protocols.Select(path =>
-                    (WaylandProtocol) new XmlSerializer(typeof(WaylandProtocol)).Deserialize(
-                        new StringReader(File.ReadAllText(path))))
-                .Where(p => !hints.ProtocolBlacklist.Contains(p.Name)).ToList();
-                
-            
-            var gen = new WaylandProtocolGenerator(allProtocols, hints);
-            
-            foreach (var protocol in allProtocols)
+
+            WaylandProtocolGroup Group(string assembly, string ns, IEnumerable<string> paths)
+                => new WaylandProtocolGroup(assembly, ns)
+                {
+                    Protocols = paths.Select(path =>
+                            (WaylandProtocol) new XmlSerializer(typeof(WaylandProtocol)).Deserialize(
+                                new StringReader(File.ReadAllText(path))))
+                        .Where(p => !hints.ProtocolBlacklist.Contains(p.Name)).ToList()
+                };
+
+            var groups = new[]
             {
-                var generated = gen.Generate(protocol);
-                File.WriteAllText(Path.Combine(generatedDir, protocol.Name + ".generated.cs"), generated);
+                Group("NWayland", "NWayland.Protocols", coreProtocols),
+                Group("NWayland.Protocols.KWayland", "NWayland.Protocols.KWayland",
+                    GlobPath("external", "kwayland", "src", "client", "protocols", "**/*.xml")),
+                Group("NWayland.Protocols.Wlr", "NWayland.Protocols.Wlr",
+                    GlobPath("external", "wlr-protocols", "**/*.xml"))
+            };
+            
+            
+            
+            var gen = new WaylandProtocolGenerator(groups, hints);
+            foreach (var g in groups)
+            {
+                var generatedDir = GetPath("src", g.Assembly, "Generated");
+                if (Directory.Exists(generatedDir))
+                    Directory.Delete(generatedDir, true);
+                Directory.CreateDirectory(generatedDir);
+                foreach (var protocol in g.Protocols)
+                {
+                    
+
+                    var generated = gen.Generate(protocol);
+                    File.WriteAllText(Path.Combine(generatedDir, protocol.Name + ".generated.cs"), generated);
+                }
             }
         }
         

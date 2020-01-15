@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using NWayland.Protocols.Wayland;
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace NWayland.Core
+namespace NWayland.Interop
 {
-    static unsafe class Interop
+    public static unsafe class LibWayland
     {
         private const string Wayland = "libwayland-client.so.0";
 

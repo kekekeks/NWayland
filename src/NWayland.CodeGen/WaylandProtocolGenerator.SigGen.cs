@@ -68,7 +68,7 @@ namespace NWayland.CodeGen
             var sigField = FieldDeclaration(new SyntaxList<AttributeListSyntax>(
                     new[] {attr}),
                 new SyntaxTokenList(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword)),
-                VariableDeclaration(ParseTypeName("NWayland.Core.WlInterface"))
+                VariableDeclaration(ParseTypeName("NWayland.Interop.WlInterface"))
                     .AddVariables(SyntaxFactory.VariableDeclarator("WlInterface")));
             cl = cl.AddMembers(sigField);
 

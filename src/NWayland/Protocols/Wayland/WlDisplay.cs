@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel;
-using NWayland.Core;
+using NWayland.Interop;
 
 namespace NWayland.Protocols.Wayland
 {
@@ -26,14 +26,14 @@ namespace NWayland.Protocols.Wayland
 
         public static WlDisplay Connect(string name = null)
         {
-            var handle = Interop.wl_display_connect(name);
+            var handle = LibWayland.wl_display_connect(name);
             if (handle == IntPtr.Zero)
                 throw new Win32Exception();
             return new WlDisplay(handle);
         }
 
-        public int Dispatch() => Interop.wl_display_dispatch(Handle);
-        public int Roundtrip() => Interop.wl_display_roundtrip(Handle);
+        public int Dispatch() => LibWayland.wl_display_dispatch(Handle);
+        public int Roundtrip() => LibWayland.wl_display_roundtrip(Handle);
 
         internal void OnUnhandledException(WlProxy proxy, Exception exception)
         {

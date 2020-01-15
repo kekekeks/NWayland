@@ -1,7 +1,7 @@
 using System;
 using NWayland.Protocols.Wayland;
 
-namespace NWayland.Core
+namespace NWayland.Interop
 {
     public unsafe interface IBindFactory<T>
     {

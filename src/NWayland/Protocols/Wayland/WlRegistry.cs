@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
-using NWayland.Core;
+using NWayland.Interop;
 
 namespace NWayland.Protocols.Wayland
 {
@@ -19,7 +19,7 @@ namespace NWayland.Protocols.Wayland
                 iface.Version,
                 IntPtr.Zero
             };
-            var proxy = Interop.wl_proxy_marshal_array_constructor(Handle, 0, args, ref iface);
+            var proxy = LibWayland.wl_proxy_marshal_array_constructor(Handle, 0, args, ref iface);
             if (proxy == IntPtr.Zero)
                 return null;
             return factory.Create(proxy, version ?? iface.Version, Display);

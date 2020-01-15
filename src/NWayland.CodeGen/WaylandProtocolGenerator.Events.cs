@@ -92,7 +92,7 @@ namespace NWayland.CodeGen
                         
                         parameterType = ParseTypeName("ReadOnlySpan<" + arrayElementType + ">");
                         argument = InvocationExpression(
-                            MemberAccess(ParseTypeName("NWayland.Core.WlArray"),
+                            MemberAccess(ParseTypeName("NWayland.Interop.WlArray"),
                                 "SpanFromWlArrayPtr<" + arrayElementType + ">"),
                             ArgumentList(SingletonSeparatedList(Argument(MemberAccess(argument, "IntPtr")))));
                     }

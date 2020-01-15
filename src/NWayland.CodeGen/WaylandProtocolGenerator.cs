@@ -14,17 +14,24 @@ namespace NWayland.CodeGen
     public partial class WaylandProtocolGenerator
     {
         private readonly WaylandGeneratorHints _hints;
-        private readonly Dictionary<string, string> _protocolNames = new Dictionary<string, string>();
-        public WaylandProtocolGenerator(List<WaylandProtocol> allProtocols, WaylandGeneratorHints hints)
+        private readonly Dictionary<string, string> _protocolFullNames = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _protocolNamespaces = new Dictionary<string, string>();
+        public WaylandProtocolGenerator(IEnumerable<WaylandProtocolGroup> protocolGroups, WaylandGeneratorHints hints)
         {
             _hints = hints;
-            foreach(var p in allProtocols)
-            foreach (var i in p.Interfaces)
+            foreach(var g in protocolGroups)
+            foreach (var p in g.Protocols)
             {
-                var name = ProtocolNamespace(p.Name) + "." + Pascalize(i.Name);
-                if(_protocolNames.ContainsKey(i.Name))
-                    throw new ArgumentException($"Can't add {i.Name} from {p.Name}, {i.Name} is already associated to {_protocolNames[i.Name]}");
-                _protocolNames.Add(i.Name, name);
+                _protocolNamespaces.Add(p.Name, g.Namespace + "." + Pascalize(p.Name));
+                foreach (var i in p.Interfaces)
+                {
+                    var fullName = ProtocolNamespace(p.Name) + "." + Pascalize(i.Name);
+                    if (_protocolFullNames.ContainsKey(i.Name))
+                        throw new ArgumentException(
+                            $"Can't add {i.Name} from {p.Name}, {i.Name} is already associated to {_protocolFullNames[i.Name]}");
+                    _protocolFullNames.Add(i.Name, fullName);
+
+                }
             }
         }
         
@@ -52,7 +59,7 @@ namespace NWayland.CodeGen
                 .AddUsings(UsingDirective(IdentifierName("System.Linq")))
                 .AddUsings(UsingDirective(IdentifierName("System.Text")))
                 .AddUsings(UsingDirective(IdentifierName("NWayland.Protocols.Wayland")))
-                .AddUsings(UsingDirective(IdentifierName("NWayland.Core")))
+                .AddUsings(UsingDirective(IdentifierName("NWayland.Interop")))
                 .AddUsings(UsingDirective(IdentifierName("System.Threading.Tasks")));
             
             
@@ -67,7 +74,7 @@ namespace NWayland.CodeGen
                         Token(SyntaxKind.UnsafeKeyword),
                         Token(SyntaxKind.PartialKeyword)))
                     .AddBaseListTypes(
-                        SimpleBaseType(SyntaxFactory.ParseTypeName("NWayland.Core.WlProxy")));
+                        SimpleBaseType(SyntaxFactory.ParseTypeName("NWayland.Protocols.Wayland.WlProxy")));
                 cl = WithSummary(cl, iface.Description);
                 cl = WithSignature(cl, iface);
                 cl = WithRequests(cl, protocol, iface);

@@ -3,7 +3,7 @@ using System.Buffers;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace NWayland.Core
+namespace NWayland.Interop
 {
     public class NWaylandMarshalledString : SafeHandle
     {

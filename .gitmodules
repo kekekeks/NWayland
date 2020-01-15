@@ -7,3 +7,6 @@
 [submodule "external/wayland-protocols"]
 	path = external/wayland-protocols
 	url = https://github.com/wayland-project/wayland-protocols.git
+[submodule "external/wlr-protocols"]
+	path = external/wlr-protocols
+	url = https://github.com/swaywm/wlr-protocols.git

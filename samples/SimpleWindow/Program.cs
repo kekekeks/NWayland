@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NWayland.Core;
+using NWayland.Interop;
 using NWayland.Protocols.Wayland;
 
 namespace SimpleWindow

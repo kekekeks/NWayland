@@ -71,7 +71,7 @@ namespace NWayland.CodeGen
                         nullCheck = true;
                         parameterType = ParseTypeName("System.String");
                         var tempName = "__marshalled__" + argName.TrimStart('@');
-                        var bufferType = ParseTypeName("NWayland.Core.NWaylandMarshalledString");
+                        var bufferType = ParseTypeName("NWayland.Interop.NWaylandMarshalledString");
 
                         statements = statements.Add(LocalDeclarationStatement(
                             new SyntaxTokenList(Token(SyntaxKind.UsingKeyword)),
@@ -107,7 +107,7 @@ namespace NWayland.CodeGen
                         callStatements = callStatements.Add(LocalDeclarationStatement(VariableDeclaration(ParseTypeName("var"))
                             .WithVariables(SingletonSeparatedList(VariableDeclarator(tempName)
                                 .WithInitializer(EqualsValueClause(
-                                    InvocationExpression(MemberAccess(ParseTypeName("NWayland.Core.WlArray"),
+                                    InvocationExpression(MemberAccess(ParseTypeName("NWayland.Interop.WlArray"),
                                         "FromPointer"), ArgumentList(SeparatedList(new[]
                                         {
                                             Argument(IdentifierName(pointerName)),
@@ -154,7 +154,7 @@ namespace NWayland.CodeGen
                 marshalArgs = marshalArgs.Add(Argument(GetWlInterfaceRefFor(ctorType)));
 
             var callExpr = InvocationExpression(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
-                    IdentifierName("Interop"),
+                    IdentifierName("LibWayland"),
                     IdentifierName(ctorType == null
                         ? "wl_proxy_marshal_array"
                         : "wl_proxy_marshal_array_constructor")),
