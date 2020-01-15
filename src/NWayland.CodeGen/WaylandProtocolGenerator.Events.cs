@@ -42,15 +42,21 @@ namespace NWayland.CodeGen
                     var argName = "@" + Pascalize(arg.Name, true);
                     if (arg.Type == WaylandArgumentTypes.Int32 
                         || arg.Type == WaylandArgumentTypes.Fixed
-                        || arg.Type == WaylandArgumentTypes.FileDescriptor)
+                        || arg.Type == WaylandArgumentTypes.FileDescriptor
+                        || arg.Type == WaylandArgumentTypes.Uint32)
                     {
-                        parameterType = ParseTypeName("System.Int32");
-                        argument = MemberAccess(argument, "Int32");
-                    }
-                    else if (arg.Type == WaylandArgumentTypes.Uint32)
-                    {
-                        parameterType = ParseTypeName("System.UInt32");
-                        argument = MemberAccess(argument, "UInt32");
+                        var nativeType = arg.Type == WaylandArgumentTypes.Uint32 ? "uint" : "int";
+
+                        var managedType =
+                            TryGetEnumTypeReference(protocol.Name, iface.Name, ev.Name, arg.Name, arg.Enum) ??
+                            nativeType;
+                        
+                        parameterType = ParseTypeName(managedType);
+                        argument = MemberAccess(argument,
+                            arg.Type == WaylandArgumentTypes.Uint32 ? "UInt32" : "Int32");
+                        
+                        if (managedType != nativeType)
+                            argument = CastExpression(ParseTypeName(managedType), argument);
                     }
                     else if (arg.Type == WaylandArgumentTypes.NewId)
                     {

@@ -57,7 +57,7 @@ namespace NWayland.CodeGen
         public WaylandProtocolDescription Description { get; set; }
 
         [System.Xml.Serialization.XmlElementAttribute("entry")]
-        public WaylandProtocolEnumEntry[] Entry { get; set; }
+        public WaylandProtocolEnumEntry[] Entries { get; set; }
 
         [System.Xml.Serialization.XmlAttributeAttribute("name")]
         public string Name { get; set; }

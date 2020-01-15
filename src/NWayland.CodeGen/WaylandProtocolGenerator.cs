@@ -79,6 +79,7 @@ namespace NWayland.CodeGen
                 cl = WithSignature(cl, iface);
                 cl = WithRequests(cl, protocol, iface);
                 cl = WithEvents(cl, protocol, iface);
+                cl = WithEnums(cl, protocol, iface);
                 cl = WithFactory(cl, iface)
                     .AddMembers(DeclareConstant("string", "InterfaceName", MakeLiteralExpression(iface.Name)))
                     .AddMembers(DeclareConstant("int", "InterfaceVersion", MakeLiteralExpression(iface.Version)));

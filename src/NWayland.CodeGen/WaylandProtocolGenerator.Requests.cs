@@ -49,17 +49,23 @@ namespace NWayland.CodeGen
                     TypeSyntax parameterType = null;
                     var nullCheck = false;
                     var argName = "@" + Pascalize(arg.Name, true);
+                    
                     if (arg.Type == WaylandArgumentTypes.Int32 
                         || arg.Type == WaylandArgumentTypes.Fixed
-                        || arg.Type == WaylandArgumentTypes.FileDescriptor)
+                        || arg.Type == WaylandArgumentTypes.FileDescriptor
+                        || arg.Type == WaylandArgumentTypes.Uint32)
                     {
-                        parameterType = ParseTypeName("System.Int32");
-                        arglist = arglist.Add(IdentifierName(argName));
-                    }
-                    else if (arg.Type == WaylandArgumentTypes.Uint32)
-                    {
-                        parameterType = ParseTypeName("System.UInt32");
-                        arglist = arglist.Add(IdentifierName(argName));
+                        var nativeType = arg.Type == WaylandArgumentTypes.Uint32 ? "uint" : "int";
+
+                        var managedType =
+                            TryGetEnumTypeReference(protocol.Name, iface.Name, request.Name, arg.Name, arg.Enum) ??
+                            nativeType;
+                            
+                        parameterType = ParseTypeName(managedType);
+                        if (nativeType != managedType)
+                            arglist = arglist.Add(CastExpression(ParseTypeName(nativeType), IdentifierName(argName)));
+                        else
+                            arglist = arglist.Add(IdentifierName(argName));
                     }
                     else if (arg.Type == WaylandArgumentTypes.NewId)
                     {
