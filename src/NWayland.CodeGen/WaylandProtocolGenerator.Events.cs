@@ -18,7 +18,7 @@ namespace NWayland.CodeGen
             for (var eventIndex=0; eventIndex<evs.Length; eventIndex++)
             {
                 var ev = evs[eventIndex];
-                var eventName = "On" + Pascalize(ev.Name);
+                var eventName = $"On{Pascalize(ev.Name)}";
 
                 var handlerParameters = new SeparatedSyntaxList<ParameterSyntax>();
                 var arguments = new SeparatedSyntaxList<ArgumentSyntax>();
@@ -27,15 +27,15 @@ namespace NWayland.CodeGen
                 arguments = arguments.Add(Argument(IdentifierName("this")));
 
                 var eargs = ev.Arguments ?? Array.Empty<WaylandProtocolArgument>();
-                for (var argIndex = 0; argIndex<eargs.Length; argIndex++)
+                for (var argIndex = 0; argIndex < eargs.Length; argIndex++)
                 {
                     var arg = eargs[argIndex];
-                    TypeSyntax parameterType = null;
+                    TypeSyntax? parameterType = null;
 
                     ExpressionSyntax argument = ElementAccessExpression(IdentifierName("arguments"),
                         BracketedArgumentList(SingletonSeparatedList(Argument(MakeLiteralExpression(argIndex)))));
 
-                    var argName = "@" + Pascalize(arg.Name, true);
+                    var argName = $"@{Pascalize(arg.Name, true)}";
                     switch (arg.Type)
                     {
                         case WaylandArgumentTypes.Int32:
@@ -73,7 +73,7 @@ namespace NWayland.CodeGen
                             parameterType = ParseTypeName("string");
 
                             argument = InvocationExpression(
-                                MemberAccess(ParseTypeName("System.Runtime.InteropServices.Marshal"), "PtrToStringAnsi"),
+                                MemberAccess(ParseTypeName("Marshal"), "PtrToStringAnsi"),
                                 ArgumentList(SingletonSeparatedList(Argument(MemberAccess(argument, "IntPtr")))));
                             break;
                         case WaylandArgumentTypes.Object:
@@ -83,7 +83,7 @@ namespace NWayland.CodeGen
                                 : GetWlInterfaceTypeName(arg.Interface);
                             parameterType = ParseTypeName(parameterTypeString);
                             argument = InvocationExpression(MemberAccess(ParseTypeName("WlProxy"),
-                                    "FromNative<" + parameterTypeString + ">"),
+                                    $"FromNative<{parameterTypeString}>"),
                                 ArgumentList(SingletonSeparatedList(Argument(MemberAccess(argument, "IntPtr")))));
                             break;
                         }
@@ -91,13 +91,11 @@ namespace NWayland.CodeGen
                         {
                             var arrayElementType = _hints.GetTypeNameForArray(protocol.Name, @interface.Name, ev.Name, arg.Name);
                             if (arg.AllowNull)
-                                throw new NotSupportedException(
-                                    "Wrapping nullable arrays is currently not supported");
-
-                            parameterType = ParseTypeName("ReadOnlySpan<" + arrayElementType + ">");
+                                throw new NotSupportedException("Wrapping nullable arrays is currently not supported");
+                            parameterType = ParseTypeName($"ReadOnlySpan<{arrayElementType}>");
                             argument = InvocationExpression(
-                                MemberAccess(ParseTypeName("NWayland.Interop.WlArray"),
-                                    "SpanFromWlArrayPtr<" + arrayElementType + ">"),
+                                MemberAccess(ParseTypeName("WlArray"),
+                                    $"SpanFromWlArrayPtr<{arrayElementType}>"),
                                 ArgumentList(SingletonSeparatedList(Argument(MemberAccess(argument, "IntPtr")))));
                             break;
                         }

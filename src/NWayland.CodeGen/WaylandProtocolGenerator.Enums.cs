@@ -8,13 +8,13 @@ namespace NWayland.CodeGen
     {
         private static EnumDeclarationSyntax CreateEnum(WaylandProtocolEnum en)
         {
-            var decl = EnumDeclaration(Pascalize(en.Name + "Enum"))
+            var decl = EnumDeclaration(Pascalize($"{en.Name}Enum"))
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
             decl = WithSummary(decl, en.Description);
             if (en.IsBitField)
                 decl = decl.AddAttributeLists(AttributeList(SingletonSeparatedList(
                     Attribute(
-                        IdentifierName("System.Flags"))
+                        IdentifierName("Flags"))
                 )));
             foreach (var entry in en.Entries)
             {
@@ -39,7 +39,6 @@ namespace NWayland.CodeGen
                 return cl;
             foreach (var en in @interface.Enums)
                 cl = cl.AddMembers(CreateEnum(en));
-
             return cl;
         }
     }

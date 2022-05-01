@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8F68B559-F852-44C9-A466-4B5027322A9C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWayland", "src\NWayland\NWayland.csproj", "{4B817FC0-BD74-4BC4-99CE-6B4D4D393B39}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWayland.CodeGen", "src\NWayland.CodeGen\NWayland.CodeGen.csproj", "{3B179C6F-B141-4F54-B7CC-CC65A61AA418}"
@@ -10,15 +8,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleWindow", "samples\Sim
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWayland.Protocols.Plasma", "src\NWayland.Protocols.Plasma\NWayland.Protocols.Plasma.csproj", "{9E2CC7A0-ED8F-4774-B752-B7F3AB6A5DA6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{87034747-2A5C-46C0-8686-FB3F500A3603}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{4B817FC0-BD74-4BC4-99CE-6B4D4D393B39} = {8F68B559-F852-44C9-A466-4B5027322A9C}
-		{3B179C6F-B141-4F54-B7CC-CC65A61AA418} = {8F68B559-F852-44C9-A466-4B5027322A9C}
-		{9E2CC7A0-ED8F-4774-B752-B7F3AB6A5DA6} = {8F68B559-F852-44C9-A466-4B5027322A9C}
+		{492D8069-E805-4C11-8BF5-BEFA44FCBF19} = {87034747-2A5C-46C0-8686-FB3F500A3603}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{4B817FC0-BD74-4BC4-99CE-6B4D4D393B39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

@@ -6,11 +6,11 @@ namespace NWayland.CodeGen
 {
     public partial class WaylandProtocolGenerator
     {
-        ClassDeclarationSyntax WithFactory(ClassDeclarationSyntax cl, WaylandProtocolInterface @interface)
+        private ClassDeclarationSyntax WithFactory(ClassDeclarationSyntax cl, WaylandProtocolInterface @interface)
         {
-            if (@interface.Name == "wl_display" || @interface.Name == "wl_registry")
+            if (@interface.Name is "wl_display" or "wl_registry")
                 return cl;
-            var factoryInterfaceType = ParseTypeName("IBindFactory<" + cl.Identifier.Text + ">");
+            var factoryInterfaceType = ParseTypeName($"IBindFactory<{cl.Identifier.Text}>");
             var fac = ClassDeclaration("ProxyFactory")
                 .AddBaseListTypes(SimpleBaseType(factoryInterfaceType))
                 .AddMembers(MethodDeclaration(
@@ -37,6 +37,7 @@ namespace NWayland.CodeGen
                             })))
                     )))
                 );
+
             cl = cl
                 .AddMembers(fac)
                 .AddMembers(PropertyDeclaration(factoryInterfaceType, "BindFactory")
@@ -49,6 +50,7 @@ namespace NWayland.CodeGen
 
                     )).WithSemicolonToken(Semicolon())
                 );
+
             return cl;
         }
     }

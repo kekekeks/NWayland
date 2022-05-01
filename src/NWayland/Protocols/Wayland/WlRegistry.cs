@@ -18,6 +18,7 @@ namespace NWayland.Protocols.Wayland
                 @interface.Version,
                 IntPtr.Zero
             };
+
             var proxy = LibWayland.wl_proxy_marshal_array_constructor(Handle, 0, args, ref @interface);
             return proxy == IntPtr.Zero ? null : factory.Create(proxy, version, Display);
         }

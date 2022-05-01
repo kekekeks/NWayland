@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NWayland.CodeGen
 {
-    public class WaylandArgumentTypes
+    public static class WaylandArgumentTypes
     {
         public const string Int32 = "int";
         public const string Uint32 = "uint";

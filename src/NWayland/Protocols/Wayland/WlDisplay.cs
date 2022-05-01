@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using NWayland.Interop;
 
 namespace NWayland.Protocols.Wayland

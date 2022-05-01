@@ -4,13 +4,13 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
 namespace NWayland.CodeGen
 {
     public partial class WaylandProtocolGenerator
     {
-        private MethodDeclarationSyntax CreateMethod(WaylandProtocol protocol, WaylandProtocolInterface @interface, WaylandProtocolRequest request, int index)
+        private MethodDeclarationSyntax? CreateMethod(WaylandProtocol protocol, WaylandProtocolInterface @interface, WaylandProtocolRequest request, int index)
         {
             var newIdArgument = request.Arguments?.FirstOrDefault(static a => a.Type == WaylandArgumentTypes.NewId);
             if (newIdArgument is not null && newIdArgument.Interface is null)
@@ -34,7 +34,7 @@ namespace NWayland.CodeGen
                     ,
                     request.Type == "destructor"
                         ? ReturnStatement()
-                        : ThrowStatement(ObjectCreationExpression(ParseTypeName("System.InvalidOperationException"))
+                        : ThrowStatement(ObjectCreationExpression(ParseTypeName("InvalidOperationException"))
                             .WithArgumentList(
                                 ArgumentList(SingletonSeparatedList(Argument(MakeLiteralExpression(
                                     $"Request {request.Name} is only supported since version {request.Since}"))))))));
@@ -42,9 +42,9 @@ namespace NWayland.CodeGen
             if (request.Arguments is not null)
                 foreach (var arg in request.Arguments ?? Array.Empty<WaylandProtocolArgument>())
                 {
-                    TypeSyntax parameterType = null;
+                    TypeSyntax? parameterType = null;
                     var nullCheck = false;
-                    var argName = "@" + Pascalize(arg.Name, true);
+                    var argName = $"@{Pascalize(arg.Name, true)}";
 
                     switch (arg.Type)
                     {
@@ -72,7 +72,7 @@ namespace NWayland.CodeGen
                             nullCheck = true;
                             parameterType = ParseTypeName("string");
                             var tempName = "__marshalled__" + argName.TrimStart('@');
-                            var bufferType = ParseTypeName("NWayland.Interop.NWaylandMarshalledString");
+                            var bufferType = ParseTypeName("NWaylandMarshalledString");
 
                             statements = statements.Add(LocalDeclarationStatement(
                                 new SyntaxTokenList(Token(SyntaxKind.UsingKeyword)),
@@ -98,7 +98,7 @@ namespace NWayland.CodeGen
                         case WaylandArgumentTypes.Array:
                         {
                             var arrayElementType = _hints.GetTypeNameForArray(protocol.Name, @interface.Name, request.Name, arg.Name);
-                            parameterType = ParseTypeName("ReadOnlySpan<" + arrayElementType + ">");
+                            parameterType = ParseTypeName($"ReadOnlySpan<{arrayElementType}>");
                             var pointerName = "__pointer__" + argName.TrimStart('@');
                             var tempName = "__marshalled__" + argName.TrimStart('@');
                             fixedDeclarations.Add(VariableDeclaration(ParseTypeName(arrayElementType + "*"),
@@ -108,7 +108,7 @@ namespace NWayland.CodeGen
                             callStatements = callStatements.Add(LocalDeclarationStatement(VariableDeclaration(ParseTypeName("var"))
                                 .WithVariables(SingletonSeparatedList(VariableDeclarator(tempName)
                                     .WithInitializer(EqualsValueClause(
-                                        InvocationExpression(MemberAccess(ParseTypeName("NWayland.Interop.WlArray"),
+                                        InvocationExpression(MemberAccess(ParseTypeName("WlArray"),
                                             "FromPointer"), ArgumentList(SeparatedList(new[]
                                             {
                                                 Argument(IdentifierName(pointerName)),
@@ -131,7 +131,7 @@ namespace NWayland.CodeGen
                         statements = statements.Insert(0, IfStatement(
                             BinaryExpression(SyntaxKind.EqualsExpression, IdentifierName(argName),
                                 MakeNullLiteralExpression()),
-                            ThrowStatement(ObjectCreationExpression(ParseTypeName("System.ArgumentNullException"))
+                            ThrowStatement(ObjectCreationExpression(ParseTypeName("ArgumentNullException"))
                                 .WithArgumentList(
                                     ArgumentList(
                                         SingletonSeparatedList(
@@ -146,7 +146,7 @@ namespace NWayland.CodeGen
 
             var marshalArgs = SeparatedList(new[]
             {
-                Argument(MemberAccess( IdentifierName("this"), "Handle")),
+                Argument(MemberAccess(IdentifierName("this"), "Handle")),
                 Argument(MakeLiteralExpression(index)),
                 Argument(IdentifierName("__args"))
             });
@@ -215,9 +215,7 @@ namespace NWayland.CodeGen
         }
 
 
-        private ClassDeclarationSyntax WithRequests(ClassDeclarationSyntax cl,
-            WaylandProtocol protocol,
-            WaylandProtocolInterface @interface)
+        private ClassDeclarationSyntax WithRequests(ClassDeclarationSyntax cl, WaylandProtocol protocol, WaylandProtocolInterface @interface)
         {
             if (@interface.Requests is null)
                 return cl;

@@ -40,10 +40,10 @@ namespace NWayland.CodeGen
         private NameSyntax ProtocolNamespaceSyntax(string protocol)
             => IdentifierName(ProtocolNamespace(protocol));
 
-        private static T WithSummary<T>(T member, WaylandProtocolDescription description) where T : MemberDeclarationSyntax
+        private static T WithSummary<T>(T member, WaylandProtocolDescription? description) where T : MemberDeclarationSyntax
             => WithSummary(member, description?.Value);
 
-        private static T WithSummary<T>(T member, string description) where T : MemberDeclarationSyntax
+        private static T WithSummary<T>(T member, string? description) where T : MemberDeclarationSyntax
         {
             if (string.IsNullOrWhiteSpace(description))
                 return member;
@@ -100,15 +100,15 @@ namespace NWayland.CodeGen
                 ).WithSemicolonToken(Semicolon())
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.ConstKeyword)));
 
-        private string TryGetEnumTypeReference(string protocol, string @interface, string message, string arg, string en)
+        private string? TryGetEnumTypeReference(string protocol, string @interface, string message, string arg, string? en)
         {
             en = _hints.FindEnumTypeNameOverride(protocol, @interface, message, arg) ?? en;
             if (en is null)
                 return null;
 
-            static string GetName(string n) => Pascalize(n) + "Enum";
+            static string GetName(string n) => $"{Pascalize(n)}Enum";
 
-            if (!en.Contains("."))
+            if (!en.Contains('.'))
                 return GetName(en);
             var sp = en.Split(new[] {'.'}, 2);
             return $"{GetWlInterfaceTypeName(sp[0])}.{GetName(sp[1])}";

@@ -11,7 +11,7 @@ namespace NWayland.Protocols.Wayland
         public IntPtr Handle { get; }
         public WlDisplay Display { get; }
 
-        public WlProxy(IntPtr handle, int version, WlDisplay display)
+        protected WlProxy(IntPtr handle, int version, WlDisplay display)
         {
             Version = version;
             Handle = handle;

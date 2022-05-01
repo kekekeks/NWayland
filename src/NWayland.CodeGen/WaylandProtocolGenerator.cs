@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Formatting;
@@ -52,12 +51,10 @@ namespace NWayland.CodeGen
         private CompilationUnitSyntax Generate(CompilationUnitSyntax code, WaylandProtocol protocol)
         {
             code = code.AddUsings(UsingDirective(IdentifierName("System")))
-                .AddUsings(UsingDirective(IdentifierName("System.Collections.Generic")))
-                .AddUsings(UsingDirective(IdentifierName("System.Linq")))
-                .AddUsings(UsingDirective(IdentifierName("System.Text")))
+                .AddUsings(UsingDirective(IdentifierName("System.Runtime.CompilerServices")))
+                .AddUsings(UsingDirective(IdentifierName("System.Runtime.InteropServices")))
                 .AddUsings(UsingDirective(IdentifierName("NWayland.Protocols.Wayland")))
-                .AddUsings(UsingDirective(IdentifierName("NWayland.Interop")))
-                .AddUsings(UsingDirective(IdentifierName("System.Threading.Tasks")));
+                .AddUsings(UsingDirective(IdentifierName("NWayland.Interop")));
 
             var ns = NamespaceDeclaration(ProtocolNamespaceSyntax(protocol.Name));
 
@@ -70,7 +67,7 @@ namespace NWayland.CodeGen
                         Token(SyntaxKind.UnsafeKeyword),
                         Token(SyntaxKind.PartialKeyword)))
                     .AddBaseListTypes(
-                        SimpleBaseType(ParseTypeName("NWayland.Protocols.Wayland.WlProxy")));
+                        SimpleBaseType(ParseTypeName("WlProxy")));
                 cl = WithSummary(cl, @interface.Description);
                 cl = WithSignature(cl, @interface);
                 cl = WithRequests(cl, protocol, @interface);
@@ -90,7 +87,7 @@ namespace NWayland.CodeGen
                                 Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
                                 Parameter(Identifier("version")).WithType(ParseTypeName("int")),
                                 Parameter(Identifier("display"))
-                                    .WithType(ParseTypeName("NWayland.Protocols.Wayland.WlDisplay"))
+                                    .WithType(ParseTypeName("WlDisplay"))
                             }))).WithBody(Block())
                         .WithInitializer(ConstructorInitializer(SyntaxKind.BaseConstructorInitializer,
                             ArgumentList(SeparatedList(new[]

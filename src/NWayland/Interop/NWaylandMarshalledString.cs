@@ -8,9 +8,9 @@ namespace NWayland.Interop
     public class NWaylandMarshalledString : SafeHandle
     {
         private GCHandle _gcHandle;
-        private byte[] _data;
+        private byte[]? _data;
 
-        public NWaylandMarshalledString(string s) : base(IntPtr.Zero, true)
+        public NWaylandMarshalledString(string? s) : base(IntPtr.Zero, true)
         {
             if (s is null)
                 return;
@@ -21,8 +21,6 @@ namespace NWayland.Interop
             _gcHandle = GCHandle.Alloc(_data, GCHandleType.Pinned);
             handle = _gcHandle.AddrOfPinnedObject();
         }
-
-        public int ByteLen => _data.Length;
 
         public override bool IsInvalid => false;
 

@@ -1,4 +1,3 @@
-// ReSharper disable UnusedMember.Global
 namespace NWayland.CodeGen
 {
     [System.SerializableAttribute]
@@ -20,14 +19,14 @@ namespace NWayland.CodeGen
     public class WaylandProtocolInterface
     {
         [System.Xml.Serialization.XmlElementAttribute("enum", typeof(WaylandProtocolEnum))]
-        public WaylandProtocolEnum[] Enums { get; set; }
+        public WaylandProtocolEnum[]? Enums { get; set; }
         [System.Xml.Serialization.XmlElementAttribute("event", typeof(WaylandProtocolMessage))]
-        public WaylandProtocolMessage [] Events { get; set; }
+        public WaylandProtocolMessage[]? Events { get; set; }
         [System.Xml.Serialization.XmlElementAttribute("request", typeof(WaylandProtocolRequest))]
-        public WaylandProtocolRequest[] Requests { get; set; }
+        public WaylandProtocolRequest[]? Requests { get; set; }
 
         [System.Xml.Serialization.XmlElementAttribute("description", typeof(WaylandProtocolDescription))]
-        public WaylandProtocolDescription Description { get; set; }
+        public WaylandProtocolDescription? Description { get; set; }
 
         [System.Xml.Serialization.XmlAttributeAttribute("name")]
         public string Name { get; set; }
@@ -97,7 +96,7 @@ namespace NWayland.CodeGen
         public WaylandProtocolDescription Description { get; set; }
 
         [System.Xml.Serialization.XmlElementAttribute("arg")]
-        public WaylandProtocolArgument[] Arguments { get; set; }
+        public WaylandProtocolArgument[]? Arguments { get; set; }
 
         [System.Xml.Serialization.XmlAttributeAttribute("name")]
         public string Name { get; set; }
@@ -136,6 +135,6 @@ namespace NWayland.CodeGen
         public bool AllowNull { get; set; }
 
         [System.Xml.Serialization.XmlAttributeAttribute("interface")]
-        public string Interface { get; set; }
+        public string? Interface { get; set; }
     }
 }

@@ -42,8 +42,8 @@ namespace NWayland.CodeGen
                 => new(assembly, ns)
                 {
                     Protocols = paths.Select(static path =>
-                            (WaylandProtocol) new XmlSerializer(typeof(WaylandProtocol)).Deserialize(
-                                new StringReader(File.ReadAllText(path))))
+                            new XmlSerializer(typeof(WaylandProtocol)).Deserialize(
+                                new StringReader(File.ReadAllText(path))) as WaylandProtocol)
                         .Where(p => p is not null && !hints.ProtocolBlacklist.Contains(p.Name)).ToList()!
                 };
 

@@ -4,8 +4,8 @@ namespace NWayland.CodeGen
 {
     public class WaylandProtocolGroup
     {
-        public string Assembly { get; set; }
-        public string Namespace { get; set; }
+        public string Assembly { get; }
+        public string Namespace { get; }
         public List<WaylandProtocol> Protocols { get; set; } = new();
 
         public WaylandProtocolGroup(string assembly, string ns)

@@ -62,12 +62,12 @@ namespace NWayland.CodeGen
         {
             var attr = AttributeList(SingletonSeparatedList(
                 Attribute(
-                    IdentifierName("System.Runtime.CompilerServices.FixedAddressValueType"))
+                    IdentifierName("FixedAddressValueType"))
             )).NormalizeWhitespace();
             var sigField = FieldDeclaration(new SyntaxList<AttributeListSyntax>(
                     new[] {attr}),
                 new SyntaxTokenList(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword)),
-                VariableDeclaration(ParseTypeName("NWayland.Interop.WlInterface"))
+                VariableDeclaration(ParseTypeName("WlInterface"))
                     .AddVariables(VariableDeclarator("WlInterface")));
             cl = cl.AddMembers(sigField);
 
