@@ -64,7 +64,7 @@ namespace NWayland.CodeGen
                 foreach (var protocol in g.Protocols)
                 {
                     var generated = gen.Generate(protocol);
-                    File.WriteAllText(Path.Combine(generatedDir, $"{WaylandProtocolGenerator.Pascalize(protocol.Name)}.cs"), generated);
+                    File.WriteAllText(Path.Combine(generatedDir, $"{WaylandProtocolGenerator.Pascalize(protocol.Name)}.Generated.cs"), generated);
                 }
             }
         }
