@@ -38,9 +38,6 @@ namespace NWayland.Interop
         [DllImport(Wayland)]
         private static extern uint wl_proxy_get_id(IntPtr proxy);
 
-        [DllImport(Wayland)]
-        public static extern void wl_callback_destroy(IntPtr callback);
-
         [DllImport(WaylandEgl)]
         public static extern IntPtr wl_egl_window_create(IntPtr surface, int width, int height);
 
