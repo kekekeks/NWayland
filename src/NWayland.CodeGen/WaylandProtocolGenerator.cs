@@ -1,21 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Formatting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
 namespace NWayland.CodeGen
 {
     public partial class WaylandProtocolGenerator
     {
         private readonly WaylandGeneratorHints _hints;
-        private readonly Dictionary<string, string> _protocolFullNames = new Dictionary<string, string>();
-        private readonly Dictionary<string, string> _protocolNamespaces = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _protocolFullNames = new();
+        private readonly Dictionary<string, string> _protocolNamespaces = new();
+
         public WaylandProtocolGenerator(IEnumerable<WaylandProtocolGroup> protocolGroups, WaylandGeneratorHints hints)
         {
             _hints = hints;
@@ -34,10 +33,9 @@ namespace NWayland.CodeGen
                 }
             }
         }
-        
+
         public string Generate(WaylandProtocol protocol)
         {
-            
             var unit = CompilationUnit();
             unit = Generate(unit, protocol);
             var cw = new AdhocWorkspace();
@@ -46,13 +44,12 @@ namespace NWayland.CodeGen
                 .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInObjectCollectionArrayInitializers, true)
                 .WithChangedOption(CSharpFormattingOptions.NewLineForMembersInAnonymousTypes, true)
                 .WithChangedOption(CSharpFormattingOptions.NewLinesForBracesInMethods, true)
-            
             );
+
             return formatted.ToFullString();
         }
 
-        
-        CompilationUnitSyntax Generate(CompilationUnitSyntax code, WaylandProtocol protocol)
+        private CompilationUnitSyntax Generate(CompilationUnitSyntax code, WaylandProtocol protocol)
         {
             code = code.AddUsings(UsingDirective(IdentifierName("System")))
                 .AddUsings(UsingDirective(IdentifierName("System.Collections.Generic")))
@@ -61,31 +58,29 @@ namespace NWayland.CodeGen
                 .AddUsings(UsingDirective(IdentifierName("NWayland.Protocols.Wayland")))
                 .AddUsings(UsingDirective(IdentifierName("NWayland.Interop")))
                 .AddUsings(UsingDirective(IdentifierName("System.Threading.Tasks")));
-            
-            
+
             var ns = NamespaceDeclaration(ProtocolNamespaceSyntax(protocol.Name));
 
-            foreach (var iface in protocol.Interfaces)
+            foreach (var @interface in protocol.Interfaces)
             {
-                var cl = ClassDeclaration(Pascalize(iface.Name))
+                var cl = ClassDeclaration(Pascalize(@interface.Name))
                     .WithModifiers(new SyntaxTokenList(
                         Token(SyntaxKind.PublicKeyword),
                         Token(SyntaxKind.SealedKeyword),
                         Token(SyntaxKind.UnsafeKeyword),
                         Token(SyntaxKind.PartialKeyword)))
                     .AddBaseListTypes(
-                        SimpleBaseType(SyntaxFactory.ParseTypeName("NWayland.Protocols.Wayland.WlProxy")));
-                cl = WithSummary(cl, iface.Description);
-                cl = WithSignature(cl, iface);
-                cl = WithRequests(cl, protocol, iface);
-                cl = WithEvents(cl, protocol, iface);
-                cl = WithEnums(cl, protocol, iface);
-                cl = WithFactory(cl, iface)
-                    .AddMembers(DeclareConstant("string", "InterfaceName", MakeLiteralExpression(iface.Name)))
-                    .AddMembers(DeclareConstant("int", "InterfaceVersion", MakeLiteralExpression(iface.Version)));
-                
+                        SimpleBaseType(ParseTypeName("NWayland.Protocols.Wayland.WlProxy")));
+                cl = WithSummary(cl, @interface.Description);
+                cl = WithSignature(cl, @interface);
+                cl = WithRequests(cl, protocol, @interface);
+                cl = WithEvents(cl, protocol, @interface);
+                cl = WithEnums(cl, protocol, @interface);
+                cl = WithFactory(cl, @interface)
+                    .AddMembers(DeclareConstant("string", "InterfaceName", MakeLiteralExpression(@interface.Name)))
+                    .AddMembers(DeclareConstant("int", "InterfaceVersion", MakeLiteralExpression(@interface.Version)));
 
-                if (iface.Name != "wl_display")
+                if (@interface.Name != "wl_display")
                 {
                     var ctor = ConstructorDeclaration(cl.Identifier)
                         .AddModifiers(Token(SyntaxKind.PublicKeyword))
@@ -95,7 +90,7 @@ namespace NWayland.CodeGen
                                 Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
                                 Parameter(Identifier("version")).WithType(ParseTypeName("int")),
                                 Parameter(Identifier("display"))
-                                    .WithType(ParseTypeName("NWayland.Protocols.Wayland.WlDisplay")),
+                                    .WithType(ParseTypeName("NWayland.Protocols.Wayland.WlDisplay"))
                             }))).WithBody(Block())
                         .WithInitializer(ConstructorInitializer(SyntaxKind.BaseConstructorInitializer,
                             ArgumentList(SeparatedList(new[]
@@ -112,8 +107,5 @@ namespace NWayland.CodeGen
 
             return code.AddMembers(ns);
         }
-
-
-       
     }
 }

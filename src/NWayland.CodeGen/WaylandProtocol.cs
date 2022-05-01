@@ -105,7 +105,7 @@ namespace NWayland.CodeGen
         [System.Xml.Serialization.XmlAttributeAttribute("since")]
         public int Since { get; set; }
     }
-    
+
     [System.SerializableAttribute]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]

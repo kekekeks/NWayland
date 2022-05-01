@@ -12,7 +12,7 @@ namespace NWayland.Interop
 
         public NWaylandMarshalledString(string s) : base(IntPtr.Zero, true)
         {
-            if (s == null)
+            if (s is null)
                 return;
             var len = Encoding.UTF8.GetByteCount(s);
             _data = ArrayPool<byte>.Shared.Rent(len + 1);
@@ -24,12 +24,14 @@ namespace NWayland.Interop
 
         public int ByteLen => _data.Length;
 
+        public override bool IsInvalid => false;
+
         protected override bool ReleaseHandle()
         {
             if (handle != IntPtr.Zero)
             {
                 handle = IntPtr.Zero;
-                if (_data != null)
+                if (_data is not null)
                     ArrayPool<byte>.Shared.Return(_data);
                 _data = null;
                 _gcHandle.Free();
@@ -37,9 +39,5 @@ namespace NWayland.Interop
 
             return true;
         }
-
-        public override bool IsInvalid => false;
-
     }
-
 }

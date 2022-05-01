@@ -1,35 +1,35 @@
 using System;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
 namespace NWayland.CodeGen
 {
     public partial class WaylandProtocolGenerator
     {
-        InvocationExpressionSyntax GenerateWlMessage(WaylandProtocolMessage msg)
+        private InvocationExpressionSyntax GenerateWlMessage(WaylandProtocolMessage msg)
         {
             var signature = new StringBuilder();
             if (msg.Since != 0)
                 signature.Append(msg.Since);
-            var ifaceList = new SeparatedSyntaxList<ExpressionSyntax>();
-            if (msg.Arguments != null)
-            {
+            var interfaceList = new SeparatedSyntaxList<ExpressionSyntax>();
+            if (msg.Arguments is not null)
                 foreach (var arg in msg.Arguments)
                 {
                     if (arg.AllowNull)
                         signature.Append('?');
-                    if (arg.Type == WaylandArgumentTypes.NewId && arg.Interface == null)
+                    if (arg.Type == WaylandArgumentTypes.NewId && arg.Interface is null)
                         signature.Append("su");
                     signature.Append(WaylandArgumentTypes.NamesToCodes[arg.Type]);
                     if (!string.IsNullOrWhiteSpace(arg.Interface))
-                        ifaceList = ifaceList.Add(
+                        interfaceList = interfaceList.Add(
                             GetWlInterfaceAddressFor(arg.Interface));
                     else
-                        ifaceList = ifaceList.Add(MakeNullLiteralExpression());
+                        interfaceList = interfaceList.Add(MakeNullLiteralExpression());
                 }
-            }
 
             var argList = ArgumentList(SeparatedList(new[]
             {
@@ -37,7 +37,7 @@ namespace NWayland.CodeGen
                 Argument(MakeLiteralExpression(signature.ToString())),
                 Argument(ArrayCreationExpression(ArrayType(ParseTypeName("WlInterface*[]")))
                     .WithInitializer(InitializerExpression(SyntaxKind.ArrayInitializerExpression,
-                        ifaceList)))
+                        interfaceList)))
 
             }));
 
@@ -45,10 +45,10 @@ namespace NWayland.CodeGen
                 MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
                     IdentifierName("WlMessage"), IdentifierName("Create")),
                 argList
-            ).WithLeadingTrivia(SyntaxFactory.CarriageReturn);
+            ).WithLeadingTrivia(CarriageReturn);
         }
 
-        ArgumentSyntax GenerateWlMessageList(in WaylandProtocolMessage[] messages)
+        private ArgumentSyntax GenerateWlMessageList(in WaylandProtocolMessage[] messages)
         {
             var elements = new SeparatedSyntaxList<ExpressionSyntax>();
             foreach (var msg in messages)
@@ -57,9 +57,8 @@ namespace NWayland.CodeGen
                 SyntaxKind.ArrayInitializerExpression,
                 elements)));
         }
-        
-        
-        ClassDeclarationSyntax WithSignature(ClassDeclarationSyntax cl, WaylandProtocolInterface iface)
+
+        private ClassDeclarationSyntax WithSignature(ClassDeclarationSyntax cl, WaylandProtocolInterface @interface)
         {
             var attr = AttributeList(SingletonSeparatedList(
                 Attribute(
@@ -69,7 +68,7 @@ namespace NWayland.CodeGen
                     new[] {attr}),
                 new SyntaxTokenList(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword)),
                 VariableDeclaration(ParseTypeName("NWayland.Interop.WlInterface"))
-                    .AddVariables(SyntaxFactory.VariableDeclarator("WlInterface")));
+                    .AddVariables(VariableDeclarator("WlInterface")));
             cl = cl.AddMembers(sigField);
 
             var staticCtor = ConstructorDeclaration(cl.Identifier)
@@ -81,20 +80,19 @@ namespace NWayland.CodeGen
 
                 ArgumentList(SeparatedList(new[]
                     {
-                        Argument(MakeLiteralExpression(iface.Name)),
-                        Argument(MakeLiteralExpression(iface.Version)),
-                        GenerateWlMessageList(iface.Requests ?? new WaylandProtocolMessage[0]),
-                        GenerateWlMessageList(iface.Events ?? new WaylandProtocolMessage[0])
+                        Argument(MakeLiteralExpression(@interface.Name)),
+                        Argument(MakeLiteralExpression(@interface.Version)),
+                        GenerateWlMessageList(@interface.Requests?.Cast<WaylandProtocolMessage>().ToArray() ?? Array.Empty<WaylandProtocolMessage>()),
+                        GenerateWlMessageList(@interface.Events ?? Array.Empty<WaylandProtocolMessage>())
                     }
                 )))));
-            
 
             cl = cl.AddMembers(staticCtor);
 
             cl = cl.AddMembers(MethodDeclaration(ParseTypeName("WlInterface*"), "GetWlInterface")
                 .WithModifiers(TokenList(Token(SyntaxKind.ProtectedKeyword), Token(SyntaxKind.OverrideKeyword)))
-                .WithBody(Block(ReturnStatement(GetWlInterfaceAddressFor(iface.Name)))));
-            
+                .WithBody(Block(ReturnStatement(GetWlInterfaceAddressFor(@interface.Name)))));
+
             return cl;
         }
     }

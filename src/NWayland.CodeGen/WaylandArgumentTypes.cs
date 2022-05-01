@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace NWayland.CodeGen
@@ -14,7 +13,7 @@ namespace NWayland.CodeGen
         public const string Array = "array";
         public const string FileDescriptor = "fd";
 
-        public static Dictionary<string, char> NamesToCodes = new Dictionary<string, char>
+        public static readonly Dictionary<string, char> NamesToCodes = new()
         {
             ["int"] = 'i',
             ["uint"] = 'u',
@@ -23,8 +22,7 @@ namespace NWayland.CodeGen
             ["object"] = 'o',
             ["new_id"] = 'n',
             ["array"] = 'a',
-            ["fd"] = 'h',
+            ["fd"] = 'h'
         };
-
     }
 }

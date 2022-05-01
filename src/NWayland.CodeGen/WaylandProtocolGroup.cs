@@ -6,7 +6,7 @@ namespace NWayland.CodeGen
     {
         public string Assembly { get; set; }
         public string Namespace { get; set; }
-        public List<WaylandProtocol> Protocols { get; set; } = new List<WaylandProtocol>();
+        public List<WaylandProtocol> Protocols { get; set; } = new();
 
         public WaylandProtocolGroup(string assembly, string ns)
         {

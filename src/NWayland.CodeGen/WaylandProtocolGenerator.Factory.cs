@@ -1,13 +1,14 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
 namespace NWayland.CodeGen
 {
     public partial class WaylandProtocolGenerator
     {
-        ClassDeclarationSyntax WithFactory(ClassDeclarationSyntax cl, WaylandProtocolInterface iface)
+        ClassDeclarationSyntax WithFactory(ClassDeclarationSyntax cl, WaylandProtocolInterface @interface)
         {
-            if (iface.Name == "wl_display" || iface.Name == "wl_registry")
+            if (@interface.Name == "wl_display" || @interface.Name == "wl_registry")
                 return cl;
             var factoryInterfaceType = ParseTypeName("IBindFactory<" + cl.Identifier.Text + ">");
             var fac = ClassDeclaration("ProxyFactory")
@@ -15,7 +16,7 @@ namespace NWayland.CodeGen
                 .AddMembers(MethodDeclaration(
                         ParseTypeName("WlInterface*"), "GetInterface")
                     .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                    .WithBody(Block(ReturnStatement(GetWlInterfaceAddressFor(iface.Name))))
+                    .WithBody(Block(ReturnStatement(GetWlInterfaceAddressFor(@interface.Name))))
                 )
                 .AddMembers(MethodDeclaration(
                         ParseTypeName(cl.Identifier.Text), "Create")
@@ -24,7 +25,7 @@ namespace NWayland.CodeGen
                     {
                         Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
                         Parameter(Identifier("version")).WithType(ParseTypeName("int")),
-                        Parameter(Identifier("display")).WithType(ParseTypeName("WlDisplay")),
+                        Parameter(Identifier("display")).WithType(ParseTypeName("WlDisplay"))
                     })))
                     .WithBody(Block(ReturnStatement(
                         ObjectCreationExpression(ParseTypeName(cl.Identifier.Text))

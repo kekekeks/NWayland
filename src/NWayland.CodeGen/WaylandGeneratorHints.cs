@@ -7,52 +7,54 @@ namespace NWayland.CodeGen
 {
     public class WaylandGeneratorHints
     {
-        static bool IsMatch(string what, string pattern)
-        {
-            if (pattern == null)
-                return true;
-            return Regex.IsMatch(what, pattern);
-        }
-        
+        private static bool IsMatch(string what, string? pattern)
+            => pattern is null || Regex.IsMatch(what, pattern);
+
         public class TypeNameHint
         {
-            public string Protocol { get; set; }
-            public string Interface { get; set; }
-            public string Message { get; set; }
-            public string Argument { get; set; }
-            public string TypeName { get; set; }
-
-            public bool Match(string protocol, string iface, string message, string argument)
+            public TypeNameHint(string protocol, string @interface, string message, string argument, string typeName)
             {
-                return IsMatch(protocol, Protocol)
-                       && IsMatch(Interface, iface)
-                       && IsMatch(Message, message)
-                       && IsMatch(Argument, argument);
+                Protocol = protocol;
+                Interface = @interface;
+                Message = message;
+                Argument = argument;
+                TypeName = typeName;
             }
-        }
-        
-        public TypeNameHintCollection ArrayTypeNameHints { get; } = new TypeNameHintCollection();
-        public TypeNameHintCollection EnumTypeNameHints { get; } = new TypeNameHintCollection();
 
-        public List<string> ProtocolBlacklist { get; set; } = new List<string>();
-        
+            public string Protocol { get; }
+            public string Interface { get; }
+            public string Message { get; }
+            public string Argument { get; }
+            public string TypeName { get; }
+
+            public bool Match(string protocol, string @interface, string message, string argument)
+                => IsMatch(Protocol, protocol)
+                   && IsMatch(Interface, @interface)
+                   && IsMatch(Message, message)
+                   && IsMatch(Argument, argument);
+        }
+
+        public TypeNameHintCollection ArrayTypeNameHints { get; } = new();
+        public TypeNameHintCollection EnumTypeNameHints { get; } = new();
+
+        public List<string> ProtocolBlacklist { get; } = new();
+
         public class TypeNameHintCollection : List<TypeNameHint>
         {
-            public void Add(string protocol, string iface, string message, string arg, string typeName)
-                => Add(new TypeNameHint
-                    {Protocol = protocol, Interface = iface, Message = message, Argument = arg, TypeName = typeName});
+            public void Add(string protocol, string @interface, string message, string arg, string typeName)
+                => Add(new TypeNameHint(protocol, @interface, message, arg, typeName));
         }
-        
-        public string GetTypeNameForArray(string protocol, string iface, string message, string argument)
+
+        public string GetTypeNameForArray(string protocol, string @interface, string message, string argument)
         {
-            var found = ArrayTypeNameHints.LastOrDefault(x => x.Match(protocol, iface, message, argument))?.TypeName;
-            if (found != null)
+            var found = ArrayTypeNameHints.LastOrDefault(x => x.Match(protocol, @interface, message, argument))?.TypeName;
+            if (found is not null)
                 return found;
-            Console.Error.WriteLine($"Unknown array type for {protocol}:{iface}:{message}:{argument}");
+            Console.Error.WriteLine($"Unknown array type for {protocol}:{@interface}:{message}:{argument}");
             return "byte";
         }
-        
-        public string FindEnumTypeNameOverride(string protocol, string iface, string message, string argument) 
-            => EnumTypeNameHints.LastOrDefault(x => x.Match(protocol, iface, message, argument))?.TypeName;
+
+        public string? FindEnumTypeNameOverride(string protocol, string @interface, string message, string argument)
+            => EnumTypeNameHints.LastOrDefault(x => x.Match(protocol, @interface, message, argument))?.TypeName;
     }
 }

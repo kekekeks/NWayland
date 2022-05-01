@@ -1,28 +1,29 @@
 using System;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
 using NWayland.Interop;
-using NWayland.Protocols.Wayland;
 
 namespace NWayland.Protocols.Wayland
 {
     public abstract unsafe class WlProxy : IDisposable
     {
+        private readonly uint _id;
+
         public int Version { get; }
         public IntPtr Handle { get; }
-        public WlDisplay Display { get; protected set; }
-        private readonly uint _id;
+        public WlDisplay Display { get; }
+
         public WlProxy(IntPtr handle, int version, WlDisplay display)
         {
             Version = version;
             Handle = handle;
             Display = display;
-            
+
             if (this is WlDisplay d)
+            {
                 Display = d;
+            }
             else
             {
-                if (display == null)
+                if (display is null)
                     throw new ArgumentNullException(nameof(display));
                 _id = LibWayland.RegisterProxy(this);
             }
@@ -30,7 +31,7 @@ namespace NWayland.Protocols.Wayland
 
         protected abstract WlInterface* GetWlInterface();
 
-        static bool strcmp(byte* left, byte* right)
+        private static bool strcmp(byte* left, byte* right)
         {
             for (var c = 0;; c++)
             {
@@ -42,15 +43,15 @@ namespace NWayland.Protocols.Wayland
         }
 
         protected abstract void DispatchEvent(uint opcode, WlArgument* arguments);
-        
-        internal unsafe void DispatchEvent(uint opcode, ref WlMessage message, WlArgument* arguments)
+
+        internal void DispatchEvent(uint opcode, ref WlMessage message, WlArgument* arguments)
         {
             // Sanity checks
             // TODO: trigger a warning or something if this happens for some weird reason
-            var iface = GetWlInterface();
-            if (opcode >= iface->EventCount)
+            var @interface = GetWlInterface();
+            if (opcode >= @interface->EventCount)
                 return;
-            var protocolMsg = iface->Events[opcode];
+            var protocolMsg = @interface->Events[opcode];
             if(!strcmp(protocolMsg.Name, message.Name))
                 return;
             if(!strcmp(protocolMsg.Signature, message.Signature))
@@ -58,27 +59,15 @@ namespace NWayland.Protocols.Wayland
             DispatchEvent(opcode, arguments);
         }
 
-        protected static T FromNative<T>(IntPtr proxy) where T : WlProxy
-        {
-            return LibWayland.FindByNative(proxy) as T;
-        }
+        protected static T? FromNative<T>(IntPtr proxy) where T : WlProxy => LibWayland.FindByNative(proxy) as T;
 
-        ~WlProxy()
-        {
-            Console.Error.WriteLine(
-                $"Finalized an undisposed {GetType().FullName}. This is an application error and will result in a memory leak. It's not thread safe to destroy wl_proxy objects from arbitrary thread since it can lead to fatal memory corruption.");
-        }
+        protected virtual void CallWaylandDestructor() { }
 
-        protected virtual void CallWaylandDestructor()
-        {
-            
-        }
-        
         public void Dispose()
         {
             if (this is WlDisplay wlDisplay)
             {
-                //TODO: free all associated objects
+                LibWayland.wl_display_disconnect(wlDisplay.Handle);
             }
             else
             {
