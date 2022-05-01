@@ -63,6 +63,8 @@ namespace NWayland.Interop
 
         private static readonly Dictionary<uint, WeakReference<WlProxy>> _proxies = new();
 
+        private static readonly WlProxyDispatcherDelegate _dispatcher = WlProxyDispatcher;
+
         private static int WlProxyDispatcher(IntPtr implementation, IntPtr target, uint opcode, ref WlMessage message, WlArgument* arguments)
         {
             var id = (uint)implementation.ToPointer();
@@ -89,7 +91,7 @@ namespace NWayland.Interop
             {
                 var id = wl_proxy_get_id(wlProxy.Handle);
                 var idp = (IntPtr)new UIntPtr(id).ToPointer();
-                wl_proxy_add_dispatcher(wlProxy.Handle, WlProxyDispatcher, idp, idp);
+                wl_proxy_add_dispatcher(wlProxy.Handle, _dispatcher, idp, idp);
                 _proxies[id] = new WeakReference<WlProxy>(wlProxy);
                 return id;
             }
