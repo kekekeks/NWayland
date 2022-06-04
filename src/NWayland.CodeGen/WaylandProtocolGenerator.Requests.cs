@@ -101,7 +101,7 @@ namespace NWayland.CodeGen
                             parameterType = ParseTypeName($"ReadOnlySpan<{arrayElementType}>");
                             var pointerName = "__pointer__" + argName.TrimStart('@');
                             var tempName = "__marshalled__" + argName.TrimStart('@');
-                            fixedDeclarations.Add(VariableDeclaration(ParseTypeName(arrayElementType + "*"),
+                            fixedDeclarations.Add(VariableDeclaration(ParseTypeName(arrayElementType + '*'),
                                 SingletonSeparatedList(VariableDeclarator(pointerName)
                                     .WithInitializer(EqualsValueClause(IdentifierName(argName))))));
 

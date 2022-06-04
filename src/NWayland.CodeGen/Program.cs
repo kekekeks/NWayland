@@ -16,7 +16,7 @@ namespace NWayland.CodeGen
 
         private static void AutoGen()
         {
-            var root = typeof(Program).Assembly.GetModules()[0].FullyQualifiedName;
+            var root = Environment.ProcessPath;
             while (!File.Exists(Path.Combine(root, "NWayland.sln")))
             {
                 root = Path.GetFullPath(Path.Combine(root, ".."));

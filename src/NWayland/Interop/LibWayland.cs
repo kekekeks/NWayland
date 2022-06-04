@@ -8,53 +8,33 @@ namespace NWayland.Interop
     public static unsafe class LibWayland
     {
         private const string Wayland = "libwayland-client.so.0";
-        private const string WaylandEgl = "libwayland-egl.so.1";
-        private const string WaylandCursor = "libwayland-cursor.so.0";
 
         [DllImport(Wayland, SetLastError = true)]
-        public static extern IntPtr wl_display_connect(string? name);
+        internal static extern IntPtr wl_display_connect(string? name);
 
         [DllImport(Wayland, SetLastError = true)]
-        public static extern int wl_display_dispatch(IntPtr display);
+        internal static extern int wl_display_dispatch(IntPtr display);
 
         [DllImport(Wayland, SetLastError = true)]
-        public static extern int wl_display_roundtrip(IntPtr display);
+        internal static extern int wl_display_roundtrip(IntPtr display);
 
         [DllImport(Wayland)]
-        public static extern void wl_display_disconnect(IntPtr display);
+        internal static extern void wl_display_disconnect(IntPtr display);
 
         [DllImport(Wayland)]
-        public static extern void wl_proxy_destroy(IntPtr proxy);
+        internal static extern void wl_proxy_destroy(IntPtr proxy);
 
         [DllImport(Wayland)]
-        public static extern void wl_proxy_marshal_array(IntPtr p, uint opcode, WlArgument* args);
+        internal static extern void wl_proxy_marshal_array(IntPtr p, uint opcode, WlArgument* args);
 
         [DllImport(Wayland)]
-        public static extern IntPtr wl_proxy_marshal_array_constructor(IntPtr p, uint opcode, WlArgument* args, ref WlInterface iface);
+        internal static extern IntPtr wl_proxy_marshal_array_constructor(IntPtr p, uint opcode, WlArgument* args, ref WlInterface @interface);
 
         [DllImport(Wayland)]
         private static extern int wl_proxy_add_dispatcher(IntPtr proxy, WlProxyDispatcherDelegate dispatcherFunc, IntPtr implementation, IntPtr data);
 
         [DllImport(Wayland)]
         private static extern uint wl_proxy_get_id(IntPtr proxy);
-
-        [DllImport(WaylandEgl)]
-        public static extern IntPtr wl_egl_window_create(IntPtr surface, int width, int height);
-
-        [DllImport(WaylandEgl)]
-        public static extern IntPtr wl_egl_window_resize(IntPtr window, int width, int heighti, int dx, int dy);
-
-        [DllImport(WaylandEgl)]
-        public static extern void wl_egl_window_destroy(IntPtr window);
-
-        [DllImport(WaylandCursor)]
-        public static extern IntPtr wl_cursor_theme_load(string? name, int size, IntPtr shm);
-
-        [DllImport(WaylandCursor)]
-        public static extern void wl_cursor_theme_destroy(IntPtr theme);
-
-        [DllImport(WaylandCursor)]
-        public static extern IntPtr wl_cursor_theme_get_cursor(IntPtr theme, string? name);
 
         private delegate int WlProxyDispatcherDelegate(IntPtr implementation, IntPtr target, uint opcode, ref WlMessage message, WlArgument* argument);
 
