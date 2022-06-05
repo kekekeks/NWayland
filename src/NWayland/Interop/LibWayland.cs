@@ -195,7 +195,7 @@ namespace NWayland.Interop
         public static implicit operator WlArgument(int value) => new() { Int32 = value };
         public static implicit operator WlArgument(uint value) => new() { UInt32 = value };
         public static implicit operator WlArgument(IntPtr value) => new() { IntPtr = value };
-        public static implicit operator WlArgument(WlProxy value) => new() { IntPtr = value.Handle };
+        public static implicit operator WlArgument(WlProxy? value) => new() { IntPtr = value?.Handle ?? IntPtr.Zero };
         public static implicit operator WlArgument(SafeHandle? value) => new() { IntPtr = value?.DangerousGetHandle() ?? IntPtr.Zero };
         public static implicit operator WlArgument(WlArray* value) => new() { IntPtr = (IntPtr)value };
 

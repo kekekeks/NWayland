@@ -15,7 +15,7 @@ namespace NWayland.Protocols.Wayland
             {
                 name,
                 (IntPtr)@interface.Name,
-                @interface.Version,
+                version,
                 IntPtr.Zero
             };
 
