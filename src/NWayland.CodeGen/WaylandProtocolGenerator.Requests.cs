@@ -69,8 +69,8 @@ namespace NWayland.CodeGen
                             break;
                         case WaylandArgumentTypes.String:
                         {
-                            nullCheck = true;
-                            parameterType = ParseTypeName("string");
+                            nullCheck = !arg.AllowNull;
+                            parameterType = arg.AllowNull ? NullableType(ParseTypeName("string")) : ParseTypeName("string");
                             var tempName = "__marshalled__" + argName.TrimStart('@');
                             var bufferType = ParseTypeName("NWaylandMarshalledString");
 
@@ -88,8 +88,8 @@ namespace NWayland.CodeGen
                             break;
                         }
                         case WaylandArgumentTypes.Object:
-                            nullCheck = true;
-                            parameterType = ParseTypeName(GetWlInterfaceTypeName(arg.Interface));
+                            nullCheck = !arg.AllowNull;
+                            parameterType = arg.AllowNull ? NullableType(ParseTypeName(GetWlInterfaceTypeName(arg.Interface))) : ParseTypeName(GetWlInterfaceTypeName(arg.Interface));
                             arglist = arglist.Add(IdentifierName(argName));
                             break;
                         case WaylandArgumentTypes.Array when arg.AllowNull:
