@@ -13,6 +13,9 @@ namespace NWayland.Interop
         internal static extern IntPtr wl_display_connect(string? name);
 
         [DllImport(Wayland, SetLastError = true)]
+        internal static extern int wl_display_get_fd(IntPtr display);
+
+        [DllImport(Wayland, SetLastError = true)]
         internal static extern int wl_display_dispatch(IntPtr display);
 
         [DllImport(Wayland, SetLastError = true)]
@@ -20,6 +23,18 @@ namespace NWayland.Interop
 
         [DllImport(Wayland, SetLastError = true)]
         internal static extern int wl_display_roundtrip(IntPtr display);
+
+        [DllImport(Wayland, SetLastError = true)]
+        internal static extern int wl_display_prepare_read(IntPtr display);
+
+        [DllImport(Wayland, SetLastError = true)]
+        internal static extern int wl_display_read_events(IntPtr display);
+
+        [DllImport(Wayland, SetLastError = true)]
+        internal static extern int wl_display_flush(IntPtr display);
+
+        [DllImport(Wayland, SetLastError = true)]
+        internal static extern void wl_display_cancel_read(IntPtr display);
 
         [DllImport(Wayland)]
         internal static extern void wl_display_disconnect(IntPtr display);
