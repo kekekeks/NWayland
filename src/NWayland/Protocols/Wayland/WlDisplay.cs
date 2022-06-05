@@ -17,6 +17,8 @@ namespace NWayland.Protocols.Wayland
 
         public int Dispatch() => LibWayland.wl_display_dispatch(Handle);
 
+        public int DispatchPending() => LibWayland.wl_display_dispatch_pending(Handle);
+
         public int Roundtrip() => LibWayland.wl_display_roundtrip(Handle);
     }
 }

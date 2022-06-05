@@ -16,6 +16,9 @@ namespace NWayland.Interop
         internal static extern int wl_display_dispatch(IntPtr display);
 
         [DllImport(Wayland, SetLastError = true)]
+        internal static extern int wl_display_dispatch_pending(IntPtr display);
+
+        [DllImport(Wayland, SetLastError = true)]
         internal static extern int wl_display_roundtrip(IntPtr display);
 
         [DllImport(Wayland)]
@@ -97,6 +100,23 @@ namespace NWayland.Interop
                     _proxies.Remove(id);
                 return target;
             }
+        }
+
+        public static int WlFixedToInt(int @fixed) => @fixed / 256;
+
+        public static double WlFixedToDouble(int @fixed)
+        {
+            Union u = new() { i = ((1023L + 44L) << 52) + (1L << 51) + @fixed };
+            return u.d - (3L << 43);
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct Union
+        {
+            [FieldOffset(0)]
+            public double d;
+            [FieldOffset(0)]
+            public long i;
         }
     }
 
