@@ -1,90 +1,39 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using NWayland.Interop;
 using NWayland.Protocols.Wayland;
+using NWayland.Protocols.XdgDecorationUnstableV1;
+using NWayland.Protocols.XdgShell;
 
 namespace SimpleWindow
 {
-    unsafe class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static void Main()
         {
-            var display = WlDisplay.Connect(null);
+            var display = WlDisplay.Connect();
             var registry = display.GetRegistry();
-            var registryHandler = new RegistryHandler(registry);
+            var registryHandler = new WlRegistryHandler(registry);
             registry.Events = registryHandler;
             display.Dispatch();
             display.Roundtrip();
-            var globals = registryHandler.GetGlobals();
 
-            var compositor = registryHandler.Bind(WlCompositor.BindFactory, WlCompositor.InterfaceName,
-                WlCompositor.InterfaceVersion);
-            
-            display.Roundtrip();
-            var shell = registryHandler.Bind(WlShell.BindFactory, WlShell.InterfaceName, WlShell.InterfaceVersion);
-            
-            display.Roundtrip();
+            var compositor = registryHandler.BindRequiredInterface(WlCompositor.BindFactory, WlCompositor.InterfaceName, WlCompositor.InterfaceVersion);
+            var shm = registryHandler.BindRequiredInterface(WlShm.BindFactory, WlShm.InterfaceName, WlShm.InterfaceVersion);
+            var wmBase = registryHandler.BindRequiredInterface(XdgWmBase.BindFactory, XdgWmBase.InterfaceName, XdgWmBase.InterfaceVersion);
+            var decorationManager = registryHandler.BindRequiredInterface(ZxdgDecorationManagerV1.BindFactory, ZxdgDecorationManagerV1.InterfaceName, ZxdgDecorationManagerV1.InterfaceVersion);
             var surface = compositor.CreateSurface();
-            var shellSurface = shell.GetShellSurface(surface);
-            shellSurface.SetTitle("Test");
-            surface.Commit();
-            display.Dispatch();
-            display.Roundtrip();
-        }
-    }
+            var xdgSurface = wmBase.GetXdgSurface(surface);
+            var toplevel = xdgSurface.GetToplevel();
+            var decoration = decorationManager.GetToplevelDecoration(toplevel);
 
-    public class GlobalInfo
-    {
-        public uint Name { get; }
-        public string Interface { get; }
-        public uint Version { get; }
+            var window = new WlWindow(shm, surface);
+            wmBase.Events = window;
+            xdgSurface.Events = window;
+            toplevel.Events = window;
 
-        public GlobalInfo(uint name, string @interface, uint version)
-        {
-            Name = name;
-            Interface = @interface;
-            Version = version;
-        }
+            toplevel.SetTitle("Simple Window");
+            decoration.SetMode(ZxdgToplevelDecorationV1.ModeEnum.ServerSide);
+            window.Draw();
 
-        public override string ToString() => $"{Interface} version {Version} at {Name}";
-    }
-    
-    internal class RegistryHandler : WlRegistry.IEvents
-    {
-        private readonly WlRegistry _registry;
-
-        public RegistryHandler(WlRegistry registry)
-        {
-            _registry = registry;
-        }
-        private Dictionary<uint, GlobalInfo> _globals { get; } = new Dictionary<uint, GlobalInfo>();
-        public List<GlobalInfo> GetGlobals() => _globals.Values.ToList();
-        public void OnGlobal(WlRegistry eventSender, uint name, string @interface, uint version)
-        {
-            _globals[name] = new GlobalInfo(name, @interface, version);
-        }
-
-        public void OnGlobalRemove(WlRegistry eventSender, uint name)
-        {
-            _globals.Remove(name);
-        }
-
-        public unsafe T Bind<T>(IBindFactory<T> factory, string iface, int? version) where T : WlProxy
-        {
-            var glob = GetGlobals().FirstOrDefault(g => g.Interface == iface);
-            if (glob == null)
-                throw new NotSupportedException($"Unable to find {iface} in the registry");
-
-            version ??= factory.GetInterface()->Version;
-            if (version > factory.GetInterface()->Version)
-                throw new ArgumentException($"Version {version} is not supported");
-            
-            if (glob.Version < version)
-                throw new NotSupportedException(
-                    $"Compositor doesn't support {version} of {iface}, only {glob.Version} is supported");
-            
-            return _registry.Bind(glob.Name, factory, version.Value);
+            while (!window.Closed && display.Dispatch() >= 0) { }
         }
     }
 }

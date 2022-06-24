@@ -33,7 +33,7 @@ namespace NWayland.Interop
         [DllImport(Wayland, SetLastError = true)]
         internal static extern int wl_display_flush(IntPtr display);
 
-        [DllImport(Wayland, SetLastError = true)]
+        [DllImport(Wayland)]
         internal static extern void wl_display_cancel_read(IntPtr display);
 
         [DllImport(Wayland)]
