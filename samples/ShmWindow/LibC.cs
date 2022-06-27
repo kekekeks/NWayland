@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace SimpleWindow
+namespace ShmWindow
 {
     internal static class LibC
     {
@@ -9,15 +9,6 @@ namespace SimpleWindow
 
         [DllImport(C, SetLastError = true)]
         public static extern int close(int fd);
-
-        [DllImport(C, SetLastError = true)]
-        public static extern int read(int fd, IntPtr buffer, int count);
-
-        [DllImport(C, SetLastError = true)]
-        public static extern int write(int fd, IntPtr buffer, int count);
-
-        [DllImport(C, SetLastError = true)]
-        public static extern unsafe int pipe2(int* fds, FileDescriptorFlags flags);
 
         [DllImport(C, SetLastError = true)]
         public static extern IntPtr mmap(IntPtr addr, IntPtr length, MemoryProtection prot, SharingType flags, int fd, IntPtr offset);

@@ -2,9 +2,9 @@ using System;
 using NWayland.Protocols.Wayland;
 using NWayland.Protocols.XdgShell;
 
-namespace SimpleWindow
+namespace ShmWindow
 {
-    public class WlWindow : WlCallback.IEvents, XdgWmBase.IEvents, XdgSurface.IEvents, XdgToplevel.IEvents
+    public class WlShmWindow : WlCallback.IEvents, XdgWmBase.IEvents, XdgSurface.IEvents, XdgToplevel.IEvents
     {
         private readonly WlShm _shm;
         private readonly WlSurface _surface;
@@ -14,7 +14,7 @@ namespace SimpleWindow
         private int _bufferSize;
         private WlBuffer? _buffer;
 
-        public WlWindow(WlShm shm, WlSurface surface)
+        public WlShmWindow(WlShm shm, WlSurface surface)
         {
             _shm = shm;
             _surface = surface;
@@ -69,6 +69,7 @@ namespace SimpleWindow
 
 
                 pool.Dispose();
+                LibC.munmap((IntPtr)pixels, new IntPtr(size));
                 LibC.close(fd);
                 _bufferSize = size;
             }

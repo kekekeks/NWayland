@@ -1,8 +1,8 @@
-using NWayland.Protocols.Wayland;
+﻿using NWayland.Protocols.Wayland;
 using NWayland.Protocols.XdgDecorationUnstableV1;
 using NWayland.Protocols.XdgShell;
 
-namespace SimpleWindow
+namespace EglWindow
 {
     public static class Program
     {
@@ -16,7 +16,6 @@ namespace SimpleWindow
             display.Roundtrip();
 
             var compositor = registryHandler.BindRequiredInterface(WlCompositor.BindFactory, WlCompositor.InterfaceName, WlCompositor.InterfaceVersion);
-            var shm = registryHandler.BindRequiredInterface(WlShm.BindFactory, WlShm.InterfaceName, WlShm.InterfaceVersion);
             var wmBase = registryHandler.BindRequiredInterface(XdgWmBase.BindFactory, XdgWmBase.InterfaceName, XdgWmBase.InterfaceVersion);
             var decorationManager = registryHandler.BindRequiredInterface(ZxdgDecorationManagerV1.BindFactory, ZxdgDecorationManagerV1.InterfaceName, ZxdgDecorationManagerV1.InterfaceVersion);
             var surface = compositor.CreateSurface();
@@ -24,12 +23,12 @@ namespace SimpleWindow
             var toplevel = xdgSurface.GetToplevel();
             var decoration = decorationManager.GetToplevelDecoration(toplevel);
 
-            var window = new WlWindow(shm, surface);
+            var window = new WlEglWindow(display, surface);
             wmBase.Events = window;
             xdgSurface.Events = window;
             toplevel.Events = window;
 
-            toplevel.SetTitle("Simple Window");
+            toplevel.SetTitle("Egl Window");
             decoration.SetMode(ZxdgToplevelDecorationV1.ModeEnum.ServerSide);
             window.Draw();
 

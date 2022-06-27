@@ -4,7 +4,7 @@ using System.Linq;
 using NWayland.Interop;
 using NWayland.Protocols.Wayland;
 
-namespace SimpleWindow
+namespace ShmWindow
 {
     internal class WlRegistryHandler : WlRegistry.IEvents, IDisposable
     {
@@ -17,32 +17,16 @@ namespace SimpleWindow
             registry.Events = this;
         }
 
-        private Action<GlobalInfo>? _globalAdded;
-        public event Action<GlobalInfo>? GlobalAdded
-        {
-            add
-            {
-                _globalAdded += value;
-                foreach (var global in _globals.Values)
-                    value?.Invoke(global);
-            }
-            remove => _globalAdded -= value;
-        }
-
-        public event Action<GlobalInfo>? GlobalRemoved;
-
         public void OnGlobal(WlRegistry eventSender, uint name, string @interface, uint version)
         {
             var global = new GlobalInfo(name, @interface, (int)version);
             _globals[name] = global;
-            _globalAdded?.Invoke(global);
         }
 
         public void OnGlobalRemove(WlRegistry eventSender, uint name)
         {
             if (!_globals.TryGetValue(name, out var glob)) return;
             _globals.Remove(name);
-            GlobalRemoved?.Invoke(glob);
         }
 
         public T BindRequiredInterface<T>(IBindFactory<T> factory, string @interface, int version) where T : WlProxy =>
