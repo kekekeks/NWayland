@@ -20,7 +20,7 @@ namespace EglWindow
         {
             _surface = surface;
             _egl = EglPlatformOpenGlInterface.TryCreate(() => new EglDisplay(new EglInterface(), false, 0x31D8, display.Handle, null));
-            Handle = LibWlEgl.wl_egl_window_create(surface.Handle, 400, 600);
+            Handle = LibWaylandEgl.wl_egl_window_create(surface.Handle, 400, 600);
             _glSurface = new EglGlPlatformSurface(_egl, this);
             _renderTarget = _glSurface.CreateGlRenderTarget();
         }
@@ -49,7 +49,7 @@ namespace EglWindow
                 return;
 
             Size = new PixelSize(width, height);
-            LibWlEgl.wl_egl_window_resize(Handle, width, height, 0, 0);
+            LibWaylandEgl.wl_egl_window_resize(Handle, width, height, 0, 0);
         }
 
         public void OnClose(XdgToplevel eventSender)
@@ -69,7 +69,7 @@ namespace EglWindow
 
         public void Dispose()
         {
-            LibWlEgl.wl_egl_window_destroy(Handle);
+            LibWaylandEgl.wl_egl_window_destroy(Handle);
         }
     }
 }

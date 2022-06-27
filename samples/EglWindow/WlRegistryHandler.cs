@@ -4,7 +4,7 @@ using System.Linq;
 using NWayland.Interop;
 using NWayland.Protocols.Wayland;
 
-namespace ShmWindow
+namespace EglWindow
 {
     internal class WlRegistryHandler : WlRegistry.IEvents, IDisposable
     {
