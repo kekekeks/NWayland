@@ -116,23 +116,6 @@ namespace NWayland.Interop
                 return target;
             }
         }
-
-        public static int WlFixedToInt(int @fixed) => @fixed / 256;
-
-        public static double WlFixedToDouble(int @fixed)
-        {
-            Union u = new() { i = ((1023L + 44L) << 52) + (1L << 51) + @fixed };
-            return u.d - (3L << 43);
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        private struct Union
-        {
-            [FieldOffset(0)]
-            public double d;
-            [FieldOffset(0)]
-            public long i;
-        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -206,10 +189,13 @@ namespace NWayland.Interop
         public uint UInt32;
         [FieldOffset(0)]
         public IntPtr IntPtr;
+        [FieldOffset(0)]
+        public WlFixed WlFixed;
 
         public static implicit operator WlArgument(int value) => new() { Int32 = value };
         public static implicit operator WlArgument(uint value) => new() { UInt32 = value };
         public static implicit operator WlArgument(IntPtr value) => new() { IntPtr = value };
+        public static implicit operator WlArgument(WlFixed value) => new() { WlFixed = value };
         public static implicit operator WlArgument(WlProxy? value) => new() { IntPtr = value?.Handle ?? IntPtr.Zero };
         public static implicit operator WlArgument(SafeHandle? value) => new() { IntPtr = value?.DangerousGetHandle() ?? IntPtr.Zero };
         public static implicit operator WlArgument(WlArray* value) => new() { IntPtr = (IntPtr)value };

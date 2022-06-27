@@ -43,15 +43,28 @@ namespace NWayland.CodeGen
                         case WaylandArgumentTypes.FileDescriptor:
                         case WaylandArgumentTypes.Uint32:
                         {
-                            var nativeType = arg.Type == WaylandArgumentTypes.Uint32 ? "uint" : "int";
+                            var nativeType = arg.Type switch
+                            {
+                                WaylandArgumentTypes.Int32 => "int",
+                                WaylandArgumentTypes.Uint32 => "uint",
+                                WaylandArgumentTypes.Fixed => "WlFixed",
+                                _ => "int"
+                            };
 
                             var managedType =
                                 TryGetEnumTypeReference(protocol.Name, @interface.Name, ev.Name, arg.Name, arg.Enum) ??
                                 nativeType;
 
                             parameterType = ParseTypeName(managedType);
-                            argument = MemberAccess(argument,
-                                arg.Type == WaylandArgumentTypes.Uint32 ? "UInt32" : "Int32");
+                            var fieldName = arg.Type switch
+                            {
+                                WaylandArgumentTypes.Int32 => "Int32",
+                                WaylandArgumentTypes.Uint32 => "UInt32",
+                                WaylandArgumentTypes.Fixed => "WlFixed",
+                                _ => "Int32"
+                            };
+
+                            argument = MemberAccess(argument, fieldName);
 
                             if (managedType != nativeType)
                                 argument = CastExpression(ParseTypeName(managedType), argument);
