@@ -91,15 +91,16 @@ namespace NWayland.CodeGen
                             {
                                 Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
                                 Parameter(Identifier("version")).WithType(ParseTypeName("int")),
-                                Parameter(Identifier("display"))
-                                    .WithType(ParseTypeName("WlDisplay"))
+                                Parameter(Identifier("display")).WithType(ParseTypeName("WlDisplay")),
+                                Parameter(Identifier("isWrapper")).WithType(ParseTypeName("bool")).WithDefault(EqualsValueClause(ParseExpression("false")))
                             }))).WithBody(Block())
                         .WithInitializer(ConstructorInitializer(SyntaxKind.BaseConstructorInitializer,
                             ArgumentList(SeparatedList(new[]
                             {
                                 Argument(IdentifierName("handle")),
                                 Argument(IdentifierName("version")),
-                                Argument(IdentifierName("display"))
+                                Argument(IdentifierName("display")),
+                                Argument(IdentifierName("isWrapper"))
                             }))));
                     cl = cl.AddMembers(ctor);
                 }
