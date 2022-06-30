@@ -6,6 +6,7 @@ namespace NWayland.Interop
     public unsafe interface IBindFactory<out T>
     {
         WlInterface* GetInterface();
-        T Create(IntPtr handle, int version, WlDisplay display);
+
+        T Create(IntPtr handle, int version, WlDisplay display, bool isWrapper = false);
     }
 }

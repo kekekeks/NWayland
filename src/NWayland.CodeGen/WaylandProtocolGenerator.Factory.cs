@@ -12,6 +12,7 @@ namespace NWayland.CodeGen
                 return cl;
             var factoryInterfaceType = ParseTypeName($"IBindFactory<{cl.Identifier.Text}>");
             var fac = ClassDeclaration("ProxyFactory")
+                .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)))
                 .AddBaseListTypes(SimpleBaseType(factoryInterfaceType))
                 .AddMembers(MethodDeclaration(
                         ParseTypeName("WlInterface*"), "GetInterface")
@@ -25,7 +26,8 @@ namespace NWayland.CodeGen
                     {
                         Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
                         Parameter(Identifier("version")).WithType(ParseTypeName("int")),
-                        Parameter(Identifier("display")).WithType(ParseTypeName("WlDisplay"))
+                        Parameter(Identifier("display")).WithType(ParseTypeName("WlDisplay")),
+                        Parameter(Identifier("wrapper")).WithType(ParseTypeName("bool")).WithDefault(EqualsValueClause(ParseExpression("false")))
                     })))
                     .WithBody(Block(ReturnStatement(
                         ObjectCreationExpression(ParseTypeName(cl.Identifier.Text))

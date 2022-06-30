@@ -16,16 +16,31 @@ namespace NWayland.Interop
         internal static extern int wl_display_get_fd(IntPtr display);
 
         [DllImport(Wayland, SetLastError = true)]
+        internal static extern IntPtr wl_display_create_queue(IntPtr display);
+
+        [DllImport(Wayland, SetLastError = true)]
         internal static extern int wl_display_dispatch(IntPtr display);
+
+        [DllImport(Wayland, SetLastError = true)]
+        internal static extern int wl_display_dispatch_queue(IntPtr display, IntPtr queue);
 
         [DllImport(Wayland, SetLastError = true)]
         internal static extern int wl_display_dispatch_pending(IntPtr display);
 
         [DllImport(Wayland, SetLastError = true)]
+        internal static extern int wl_display_dispatch_queue_pending(IntPtr display, IntPtr queue);
+
+        [DllImport(Wayland, SetLastError = true)]
         internal static extern int wl_display_roundtrip(IntPtr display);
 
         [DllImport(Wayland, SetLastError = true)]
+        internal static extern int wl_display_roundtrip_queue(IntPtr display, IntPtr queue);
+
+        [DllImport(Wayland, SetLastError = true)]
         internal static extern int wl_display_prepare_read(IntPtr display);
+
+        [DllImport(Wayland, SetLastError = true)]
+        internal static extern int wl_display_prepare_read_queue(IntPtr display, IntPtr queue);
 
         [DllImport(Wayland, SetLastError = true)]
         internal static extern int wl_display_read_events(IntPtr display);
@@ -40,7 +55,13 @@ namespace NWayland.Interop
         internal static extern void wl_display_disconnect(IntPtr display);
 
         [DllImport(Wayland)]
-        internal static extern void wl_proxy_destroy(IntPtr proxy);
+        internal static extern void wl_event_queue_destroy(IntPtr queue);
+
+        [DllImport(Wayland)]
+        internal static extern IntPtr wl_proxy_create_wrapper(IntPtr proxy);
+
+        [DllImport(Wayland)]
+        internal static extern void wl_proxy_set_queue(IntPtr wrapper, IntPtr queue);
 
         [DllImport(Wayland)]
         internal static extern void wl_proxy_marshal_array(IntPtr p, uint opcode, WlArgument* args);
@@ -53,6 +74,12 @@ namespace NWayland.Interop
 
         [DllImport(Wayland)]
         private static extern uint wl_proxy_get_id(IntPtr proxy);
+
+        [DllImport(Wayland)]
+        internal static extern void wl_proxy_destroy(IntPtr proxy);
+
+        [DllImport(Wayland)]
+        internal static extern void wl_proxy_wrapper_destroy(IntPtr wrapper);
 
         private delegate int WlProxyDispatcherDelegate(IntPtr implementation, IntPtr target, uint opcode, ref WlMessage message, WlArgument* argument);
 
