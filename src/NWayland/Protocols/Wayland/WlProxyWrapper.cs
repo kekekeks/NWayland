@@ -8,7 +8,7 @@ namespace NWayland.Protocols.Wayland
         public WlProxyWrapper(T proxy, IBindFactory<T> bindFactory)
         {
             var handle = LibWayland.wl_proxy_create_wrapper(proxy.Handle);
-            Value = bindFactory.Create(handle, proxy.Version, proxy.Display, true);
+            Value = bindFactory.Create(handle, proxy.Version, true);
         }
 
         public T Value { get; }

@@ -185,8 +185,7 @@ namespace NWayland.CodeGen
                         ArgumentList(SeparatedList(new[]
                         {
                             Argument(IdentifierName("__ret")),
-                            Argument(IdentifierName("Version")),
-                            Argument(IdentifierName("Display"))
+                            Argument(IdentifierName("Version"))
                         }))))));
             }
 

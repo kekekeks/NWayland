@@ -5,14 +5,14 @@ namespace NWayland.Protocols.Wayland
 {
     public partial class WlDisplay
     {
-        private WlDisplay(IntPtr handle) : base(handle, 1, null!) { }
+        internal WlDisplay(IntPtr handle, int version, bool isWrapper = false) : base(handle, version, isWrapper) { }
 
         public static WlDisplay Connect(string? name = null)
         {
             var handle = LibWayland.wl_display_connect(name);
             if (handle == IntPtr.Zero)
                 throw new NWaylandException("Failed to connect to wayland display");
-            return new WlDisplay(handle);
+            return new WlDisplay(handle, 1);
         }
 
         public WlEventQueue CreateQueue() => new(this);

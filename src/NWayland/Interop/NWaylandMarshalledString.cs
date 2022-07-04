@@ -26,15 +26,13 @@ namespace NWayland.Interop
 
         protected override bool ReleaseHandle()
         {
-            if (handle != IntPtr.Zero)
-            {
-                handle = IntPtr.Zero;
-                if (_data is not null)
-                    ArrayPool<byte>.Shared.Return(_data);
-                _data = null;
-                _gcHandle.Free();
-            }
-
+            if (handle == IntPtr.Zero)
+                return true;
+            handle = IntPtr.Zero;
+            if (_data is not null)
+                ArrayPool<byte>.Shared.Return(_data);
+            _data = null;
+            _gcHandle.Free();
             return true;
         }
     }

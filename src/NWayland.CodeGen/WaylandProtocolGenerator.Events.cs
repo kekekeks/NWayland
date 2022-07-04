@@ -77,8 +77,7 @@ namespace NWayland.CodeGen
                                     ArgumentList(SeparatedList(new[]
                                         {
                                             Argument(MemberAccess(argument, "IntPtr")),
-                                            Argument(IdentifierName("Version")),
-                                            Argument(IdentifierName("Display"))
+                                            Argument(IdentifierName("Version"))
                                         }
                                     )));
                             break;
@@ -134,11 +133,12 @@ namespace NWayland.CodeGen
             }
 
             cl = cl.AddMembers(eventInterface);
-            cl = cl.AddMembers(PropertyDeclaration(ParseTypeName("IEvents"), "Events")
+            cl = cl.AddMembers(PropertyDeclaration(NullableType(ParseTypeName("IEvents")), "Events")
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
                 .WithAccessorList(AccessorList(List(new[]
                 {
                     AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                        .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)))
                         .WithSemicolonToken(Semicolon()),
                     AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
                         .WithSemicolonToken(Semicolon())

@@ -8,8 +8,6 @@ namespace NWayland.CodeGen
     {
         private ClassDeclarationSyntax WithFactory(ClassDeclarationSyntax cl, WaylandProtocolInterface @interface)
         {
-            if (@interface.Name is "wl_display" or "wl_registry")
-                return cl;
             var factoryInterfaceType = ParseTypeName($"IBindFactory<{cl.Identifier.Text}>");
             var fac = ClassDeclaration("ProxyFactory")
                 .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)))
@@ -26,7 +24,6 @@ namespace NWayland.CodeGen
                     {
                         Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
                         Parameter(Identifier("version")).WithType(ParseTypeName("int")),
-                        Parameter(Identifier("display")).WithType(ParseTypeName("WlDisplay")),
                         Parameter(Identifier("isWrapper")).WithType(ParseTypeName("bool")).WithDefault(EqualsValueClause(ParseExpression("false")))
                     })))
                     .WithBody(Block(ReturnStatement(
@@ -35,7 +32,6 @@ namespace NWayland.CodeGen
                             {
                                 Argument(IdentifierName("handle")),
                                 Argument(IdentifierName("version")),
-                                Argument(IdentifierName("display")),
                                 Argument(IdentifierName("isWrapper"))
                             })))
                     )))

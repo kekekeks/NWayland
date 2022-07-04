@@ -8,43 +8,21 @@ namespace NWayland.Protocols.Wayland
         private readonly uint _id;
         private readonly bool _isWrapper;
 
-        protected WlProxy(IntPtr handle, int version, WlDisplay display, bool isWrapper = false)
+        protected WlProxy(IntPtr handle, int version, bool isWrapper = false)
         {
             _isWrapper = isWrapper;
             Version = version;
             Handle = handle;
-            Display = display;
-
-            if (this is WlDisplay d)
-            {
-                Display = d;
-            }
-            else if (!_isWrapper)
-            {
-                if (display is null)
-                    throw new ArgumentNullException(nameof(display));
-                _id = LibWayland.RegisterProxy(this);
-            }
+            if (this is WlDisplay || _isWrapper)
+                return;
+            _id = LibWayland.RegisterProxy(this);
         }
 
         public int Version { get; }
 
         public IntPtr Handle { get; }
 
-        public WlDisplay Display { get; }
-
         protected abstract WlInterface* GetWlInterface();
-
-        private static bool strcmp(byte* left, byte* right)
-        {
-            for (var c = 0;; c++)
-            {
-                if (left[c] != right[c])
-                    return false;
-                if (left[c] == 0)
-                    return true;
-            }
-        }
 
         protected abstract void DispatchEvent(uint opcode, WlArgument* arguments);
 
@@ -63,21 +41,32 @@ namespace NWayland.Protocols.Wayland
             DispatchEvent(opcode, arguments);
         }
 
-        protected static T? FromNative<T>(IntPtr proxy) where T : WlProxy => LibWayland.FindByNative(proxy) as T;
-
         protected virtual void CallWaylandDestructor() { }
 
         public void Dispose()
         {
-            if (this is WlDisplay wlDisplay)
+            if (this is WlDisplay)
             {
-                LibWayland.wl_display_disconnect(wlDisplay.Handle);
+                LibWayland.wl_display_disconnect(Handle);
             }
             else if (!_isWrapper)
             {
                 CallWaylandDestructor();
                 LibWayland.UnregisterProxy(_id);
                 LibWayland.wl_proxy_destroy(Handle);
+            }
+        }
+
+        protected static T? FromNative<T>(IntPtr proxy) where T : WlProxy => LibWayland.FindByNative(proxy) as T;
+
+        private static bool strcmp(byte* left, byte* right)
+        {
+            for (var c = 0;; c++)
+            {
+                if (left[c] != right[c])
+                    return false;
+                if (left[c] == 0)
+                    return true;
             }
         }
     }

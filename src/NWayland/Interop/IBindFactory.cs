@@ -1,5 +1,4 @@
 using System;
-using NWayland.Protocols.Wayland;
 
 namespace NWayland.Interop
 {
@@ -7,6 +6,6 @@ namespace NWayland.Interop
     {
         WlInterface* GetInterface();
 
-        T Create(IntPtr handle, int version, WlDisplay display, bool isWrapper = false);
+        T Create(IntPtr handle, int version, bool isWrapper = false);
     }
 }
