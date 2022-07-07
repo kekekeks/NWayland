@@ -1,4 +1,4 @@
-namespace NWayland.CodeGen
+namespace NWayland.Scanner
 {
     [System.SerializableAttribute]
     [System.ComponentModel.DesignerCategoryAttribute("code")]

@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.Formatting;
 
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace NWayland.CodeGen
+namespace NWayland.Scanner
 {
     public partial class WaylandProtocolGenerator
     {

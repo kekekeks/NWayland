@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace NWayland.CodeGen
+namespace NWayland.Scanner
 {
     public partial class WaylandProtocolGenerator
     {
@@ -12,10 +12,7 @@ namespace NWayland.CodeGen
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
             decl = WithSummary(decl, en.Description);
             if (en.IsBitField)
-                decl = decl.AddAttributeLists(AttributeList(SingletonSeparatedList(
-                    Attribute(
-                        IdentifierName("Flags"))
-                )));
+                decl = decl.AddAttributeLists(AttributeList(SingletonSeparatedList(Attribute(IdentifierName("Flags")))));
             foreach (var entry in en.Entries)
             {
                 var parsed = ParseExpression(entry.Value);

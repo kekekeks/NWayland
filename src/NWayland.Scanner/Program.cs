@@ -5,7 +5,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using GlobExpressions;
 
-namespace NWayland.CodeGen
+namespace NWayland.Scanner
 {
     public static class Program
     {

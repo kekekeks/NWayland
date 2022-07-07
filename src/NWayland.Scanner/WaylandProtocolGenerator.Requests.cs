@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace NWayland.CodeGen
+namespace NWayland.Scanner
 {
     public partial class WaylandProtocolGenerator
     {
@@ -194,7 +194,7 @@ namespace NWayland.CodeGen
             }
             else
             {
-                var callBlock = (StatementSyntax) Block(callStatements);
+                var callBlock = (StatementSyntax)Block(callStatements);
                 fixedDeclarations.Reverse();
                 foreach (var fd in fixedDeclarations)
                     callBlock = FixedStatement(fd, callBlock);

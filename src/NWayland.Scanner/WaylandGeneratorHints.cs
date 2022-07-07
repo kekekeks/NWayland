@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace NWayland.CodeGen
+namespace NWayland.Scanner
 {
     public class WaylandGeneratorHints
     {

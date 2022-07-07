@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace NWayland.CodeGen
+namespace NWayland.Scanner
 {
     public class WaylandProtocolGroup
     {

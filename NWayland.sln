@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWayland", "src\NWayland\NWayland.csproj", "{4B817FC0-BD74-4BC4-99CE-6B4D4D393B39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWayland.CodeGen", "src\NWayland.CodeGen\NWayland.CodeGen.csproj", "{3B179C6F-B141-4F54-B7CC-CC65A61AA418}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWayland.Scanner", "src\NWayland.Scanner\NWayland.Scanner.csproj", "{3B179C6F-B141-4F54-B7CC-CC65A61AA418}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShmWindow", "samples\ShmWindow\ShmWindow.csproj", "{492D8069-E805-4C11-8BF5-BEFA44FCBF19}"
 EndProject
