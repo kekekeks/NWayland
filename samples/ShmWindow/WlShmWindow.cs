@@ -38,6 +38,8 @@ namespace ShmWindow
 
         public void OnConfigureBounds(XdgToplevel eventSender, int width, int height) { }
 
+        public void OnWmCapabilities(XdgToplevel eventSender, ReadOnlySpan<XdgToplevel.WmCapabilitiesEnum> capabilities) { }
+
         public void OnDone(WlCallback eventSender, uint callbackData)
         {
             eventSender.Dispose();

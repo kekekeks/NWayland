@@ -49,10 +49,7 @@ namespace EglWindow
             return _registry.Bind(global.Name, factory, requestVersion);
         }
 
-        public void Dispose()
-        {
-            _registry.Dispose();
-        }
+        public void Dispose() => _registry.Dispose();
 
         public sealed class GlobalInfo
         {

@@ -40,12 +40,8 @@ namespace OpenGL.Egl
             try
             {
                 var egli = _egl.Display.EglInterface;
-                egli.WaitClient();
-                egli.WaitGL();
-                egli.WaitNative(EglConsts.EGL_CORE_NATIVE_ENGINE);
-
+                egli.SwapInterval(_egl.Display.Handle, 0);
                 _egl.PrimaryContext.GlInterface.BindFramebuffer(GlConsts.GL_FRAMEBUFFER, 0);
-
                 success = true;
                 return new Session(_egl.Display, _egl.PrimaryEglContext, surface, info,  restoreContext, onFinish, isYFlipped);
             }

@@ -5,24 +5,24 @@ using OpenGL;
 using OpenGL.Egl;
 using OpenGL.Surfaces;
 
-
 namespace EglWindow
 {
     public class WlEglWindow :  EglGlPlatformSurfaceBase.IEglWindowGlPlatformSurfaceInfo, IDisposable, WlCallback.IEvents, XdgWmBase.IEvents, XdgSurface.IEvents, XdgToplevel.IEvents
     {
         private readonly WlSurface _surface;
-        private readonly EglPlatformOpenGlInterface _egl;
-        private readonly IGlContext _glContext;
-        private readonly EglGlPlatformSurface _glSurface;
         private readonly IGlPlatformSurfaceRenderTarget _renderTarget;
+
+        private float _t;
+        private Color _color1 = Color.Red;
+        private Color _color2 = Color.Blue;
 
         public WlEglWindow(WlDisplay display, WlSurface surface)
         {
             _surface = surface;
-            _egl = EglPlatformOpenGlInterface.TryCreate(() => new EglDisplay(new EglInterface(), false, 0x31D8, display.Handle, null));
+            var egl = EglPlatformOpenGlInterface.TryCreate(() => new EglDisplay(new EglInterface(), false, 0x31D8, display.Handle, null));
             Handle = LibWaylandEgl.wl_egl_window_create(surface.Handle, 400, 600);
-            _glSurface = new EglGlPlatformSurface(_egl, this);
-            _renderTarget = _glSurface.CreateGlRenderTarget();
+            var glSurface = new EglGlPlatformSurface(egl, this);
+            _renderTarget = glSurface.CreateGlRenderTarget();
         }
 
         public bool Closed { get; private set; }
@@ -52,24 +52,45 @@ namespace EglWindow
             LibWaylandEgl.wl_egl_window_resize(Handle, width, height, 0, 0);
         }
 
-        public void OnClose(XdgToplevel eventSender)
-        {
-            Closed = true;
-        }
+        public void OnClose(XdgToplevel eventSender) => Closed = true;
 
         public void OnConfigureBounds(XdgToplevel eventSender, int width, int height) { }
+
+        public void OnWmCapabilities(XdgToplevel eventSender, ReadOnlySpan<XdgToplevel.WmCapabilitiesEnum> capabilities) { }
 
         public void Draw()
         {
             _surface.Frame().Events = this;
+            _t += 0.01f;
+            var t = MathF.Cos(_t) * 0.5f + 0.5f;
+            var c = Color.Lerp(_color2, _color1, t);
             using var session = _renderTarget.BeginDraw();
-            session.Context.GlInterface.ClearColor(0.5f, 0f, 0, 1);
+            session.Context.GlInterface.ClearColor(c.R, c.G, c.B, 1);
             session.Context.GlInterface.Clear(GlConsts.GL_COLOR_BUFFER_BIT);
         }
 
-        public void Dispose()
+        public void Dispose() => LibWaylandEgl.wl_egl_window_destroy(Handle);
+
+        private struct Color
         {
-            LibWaylandEgl.wl_egl_window_destroy(Handle);
+            public float R;
+            public float G;
+            public float B;
+
+            public static readonly Color Black = new() { R = 0, G = 0, B = 0 };
+            public static readonly Color White = new() { R = 1, G = 1, B = 1 };
+            public static readonly Color Red = new() { R = 1, G = 0, B = 0 };
+            public static readonly Color Green = new() { R = 0, G = 1, B = 0 };
+            public static readonly Color Blue = new() { R = 0, G = 0, B = 1 };
+
+            public static Color Lerp(Color a, Color b, float t)
+            {
+                Color c;
+                c.R = (1 - t) * a.R + t * b.R;
+                c.G = (1 - t) * a.G + t * b.G;
+                c.B = (1 - t) * a.B + t * b.B;
+                return c;
+            }
         }
     }
 }
