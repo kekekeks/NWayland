@@ -82,7 +82,7 @@ namespace NWayland.CodeGen
                                     )));
                             break;
                         case WaylandArgumentTypes.String:
-                            parameterType = ParseTypeName("string");
+                            parameterType = arg.AllowNull ? NullableType(ParseTypeName("string")) : ParseTypeName("string");
 
                             argument = InvocationExpression(
                                 MemberAccess(ParseTypeName("Marshal"), "PtrToStringAnsi"),
@@ -90,24 +90,21 @@ namespace NWayland.CodeGen
                             break;
                         case WaylandArgumentTypes.Object:
                         {
-                            var parameterTypeString = arg.Interface is null
-                                ? "WlProxy"
-                                : GetWlInterfaceTypeName(arg.Interface);
-                            parameterType = ParseTypeName(parameterTypeString);
+                            var parameterTypeString = arg.Interface is null ? "WlProxy" : GetWlInterfaceTypeName(arg.Interface);
+                            parameterType = arg.AllowNull ? NullableType(ParseTypeName(parameterTypeString)) : ParseTypeName(parameterTypeString);
                             argument = InvocationExpression(MemberAccess(ParseTypeName("WlProxy"),
                                     $"FromNative<{parameterTypeString}>"),
                                 ArgumentList(SingletonSeparatedList(Argument(MemberAccess(argument, "IntPtr")))));
                             break;
                         }
+                        case WaylandArgumentTypes.Array when arg.AllowNull:
+                            throw new NotSupportedException("Wrapping nullable arrays is currently not supported");
                         case WaylandArgumentTypes.Array:
                         {
                             var arrayElementType = _hints.GetTypeNameForArray(protocol.Name, @interface.Name, ev.Name, arg.Name);
-                            if (arg.AllowNull)
-                                throw new NotSupportedException("Wrapping nullable arrays is currently not supported");
                             parameterType = ParseTypeName($"ReadOnlySpan<{arrayElementType}>");
                             argument = InvocationExpression(
-                                MemberAccess(ParseTypeName("WlArray"),
-                                    $"SpanFromWlArrayPtr<{arrayElementType}>"),
+                                MemberAccess(ParseTypeName("WlArray"), $"SpanFromWlArrayPtr<{arrayElementType}>"),
                                 ArgumentList(SingletonSeparatedList(Argument(MemberAccess(argument, "IntPtr")))));
                             break;
                         }

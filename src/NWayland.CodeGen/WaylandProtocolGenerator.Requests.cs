@@ -99,8 +99,7 @@ namespace NWayland.CodeGen
                             arglist = arglist.Add(IdentifierName(argName));
                             break;
                         case WaylandArgumentTypes.Array when arg.AllowNull:
-                            throw new NotSupportedException(
-                                "Wrapping nullable arrays is currently not supported");
+                            throw new NotSupportedException("Wrapping nullable arrays is currently not supported");
                         case WaylandArgumentTypes.Array:
                         {
                             var arrayElementType = _hints.GetTypeNameForArray(protocol.Name, @interface.Name, request.Name, arg.Name);

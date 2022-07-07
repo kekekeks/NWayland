@@ -22,15 +22,13 @@ namespace NWayland.CodeGen
             foreach(var g in protocolGroups)
             foreach (var p in g.Protocols)
             {
-                _protocolNamespaces.Add(p.Name, g.Namespace + "." + Pascalize(p.Name));
+                _protocolNamespaces.Add(p.Name, $"{g.Namespace}.{Pascalize(p.Name)}");
                 foreach (var i in p.Interfaces)
                 {
-                    var fullName = ProtocolNamespace(p.Name) + "." + Pascalize(i.Name);
+                    var fullName = $"{ProtocolNamespace(p.Name)}.{Pascalize(i.Name)}";
                     if (_protocolFullNames.ContainsKey(i.Name))
-                        throw new ArgumentException(
-                            $"Can't add {i.Name} from {p.Name}, {i.Name} is already associated to {_protocolFullNames[i.Name]}");
+                        throw new ArgumentException($"Can't add {i.Name} from {p.Name}, {i.Name} is already associated to {_protocolFullNames[i.Name]}");
                     _protocolFullNames.Add(i.Name, fullName);
-
                 }
             }
         }
