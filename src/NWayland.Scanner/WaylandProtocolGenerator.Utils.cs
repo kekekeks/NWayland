@@ -48,18 +48,24 @@ namespace NWayland.Scanner
             if (string.IsNullOrWhiteSpace(description))
                 return member;
 
-            var tokens = description
-                .Replace("\r", "")
+            var nodes = description.
+                Replace("\r", string.Empty)
                 .Split('\n')
                 .Select(static line => XmlTextLiteral(line.TrimStart()))
-                .SelectMany(static l => new[] { l, XmlTextNewLine("\n") })
-                .SkipLast(1);
+                .SelectMany(static l => new[]
+                {
+                    l.Span.IsEmpty
+                        ? new XmlNodeSyntax[] { XmlEmptyElement("br"), XmlText(XmlTextNewLine("\n")), XmlEmptyElement("br") }
+                        : new XmlNodeSyntax[] { XmlText(l) },
+                    new XmlNodeSyntax[] { XmlText(XmlTextNewLine("\n")) }
+                })
+                .SelectMany(static l => l)
+                .Skip(3)
+                .SkipLast(4);
 
-            var summary = XmlElement("summary",
-                SingletonList<XmlNodeSyntax>(XmlText(TokenList(tokens))));
+            var summary = XmlElement("summary", List(nodes));
 
-            return member.WithLeadingTrivia(TriviaList(
-                Trivia(DocumentationComment(summary, XmlText("\n")))));
+            return member.WithLeadingTrivia(TriviaList(Trivia(DocumentationComment(summary, XmlText("\n")))));
         }
 
         private static LiteralExpressionSyntax MakeLiteralExpression(string literal)

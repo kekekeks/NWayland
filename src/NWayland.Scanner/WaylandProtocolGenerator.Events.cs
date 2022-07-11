@@ -15,7 +15,7 @@ namespace NWayland.Scanner
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
 
             var dispatcherBody = Block();
-            for (var eventIndex=0; eventIndex<evs.Length; eventIndex++)
+            for (var eventIndex = 0; eventIndex < evs.Length; eventIndex++)
             {
                 var ev = evs[eventIndex];
                 var eventName = $"On{Pascalize(ev.Name)}";
@@ -114,10 +114,13 @@ namespace NWayland.Scanner
                     arguments = arguments.Add(Argument(argument));
                 }
 
-                eventInterface = eventInterface.AddMembers(
-                    MethodDeclaration(ParseTypeName("void"), eventName)
-                        .WithParameterList(ParameterList(handlerParameters))
-                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken)));
+                var method = MethodDeclaration(ParseTypeName("void"), eventName)
+                    .WithParameterList(ParameterList(handlerParameters))
+                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+
+                method = WithSummary(method, ev.Description);
+
+                eventInterface = eventInterface.AddMembers(method);
 
                 dispatcherBody = dispatcherBody.AddStatements(
                     IfStatement(BinaryExpression(
