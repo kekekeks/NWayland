@@ -10,9 +10,9 @@ namespace NWayland.Scanner
         {
             var decl = EnumDeclaration(Pascalize($"{en.Name}Enum"))
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
-            decl = WithSummary(decl, en.Description);
             if (en.IsBitField)
                 decl = decl.AddAttributeLists(AttributeList(SingletonSeparatedList(Attribute(IdentifierName("Flags")))));
+            decl = WithSummary(decl, en.Description);
             foreach (var entry in en.Entries)
             {
                 var parsed = ParseExpression(entry.Value);
