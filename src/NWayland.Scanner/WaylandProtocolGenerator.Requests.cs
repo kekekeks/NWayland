@@ -18,8 +18,7 @@ namespace NWayland.Scanner
             var ctorType = newIdArgument?.Interface;
             var dotNetCtorType = ctorType is null ? "void" : GetWlInterfaceTypeName(ctorType);
 
-            var method = MethodDeclaration(
-                ParseTypeName(dotNetCtorType), Pascalize(request.Name));
+            var method = MethodDeclaration(ParseTypeName(dotNetCtorType), Pascalize(request.Name));
 
             var plist = new SeparatedSyntaxList<ParameterSyntax>();
             var arglist = new SeparatedSyntaxList<ExpressionSyntax>();
@@ -157,13 +156,12 @@ namespace NWayland.Scanner
             });
 
             if (ctorType is not null)
-                marshalArgs = marshalArgs.Add(Argument(GetWlInterfaceRefFor(ctorType)));
+                marshalArgs = marshalArgs.Add(Argument(GetWlInterfaceRefFor(ctorType)))
+                    .Add(Argument(CastExpression(ParseTypeName("uint"), MemberAccess(IdentifierName("this"), "Version"))));
 
             var callExpr = InvocationExpression(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
                     IdentifierName("LibWayland"),
-                    IdentifierName(ctorType is null
-                        ? "wl_proxy_marshal_array"
-                        : "wl_proxy_marshal_array_constructor")),
+                    IdentifierName(ctorType is null ? "wl_proxy_marshal_array" : "wl_proxy_marshal_array_constructor_versioned")),
                 ArgumentList(marshalArgs));
 
             if (ctorType is null)

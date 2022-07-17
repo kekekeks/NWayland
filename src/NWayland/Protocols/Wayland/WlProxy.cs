@@ -57,7 +57,7 @@ namespace NWayland.Protocols.Wayland
             }
         }
 
-        protected static T? FromNative<T>(IntPtr proxy) where T : WlProxy => LibWayland.FindByNative(proxy) as T;
+        protected static T? FromNative<T>(IntPtr proxy) where T : WlProxy => proxy == IntPtr.Zero ? null : LibWayland.FindByNative(proxy) as T;
 
         private static bool strcmp(byte* left, byte* right)
         {

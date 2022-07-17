@@ -67,7 +67,7 @@ namespace NWayland.Interop
         internal static extern void wl_proxy_marshal_array(IntPtr p, uint opcode, WlArgument* args);
 
         [DllImport(Wayland)]
-        internal static extern IntPtr wl_proxy_marshal_array_constructor(IntPtr p, uint opcode, WlArgument* args, ref WlInterface @interface);
+        internal static extern IntPtr wl_proxy_marshal_array_constructor_versioned(IntPtr proxy, uint opcode, WlArgument* args, ref WlInterface @interface, uint version);
 
         [DllImport(Wayland)]
         private static extern int wl_proxy_add_dispatcher(IntPtr proxy, WlProxyDispatcherDelegate dispatcherFunc, IntPtr implementation, IntPtr data);
@@ -154,22 +154,18 @@ namespace NWayland.Interop
         public byte* Signature;
         public WlInterface** Types;
 
-        private static readonly WlInterface*[] OneNullType = { null };
-
-        public static WlMessage Create(string name, string signature, WlInterface*[]? types)
+        public WlMessage(string name, string signature, WlInterface*[]? types)
         {
             types ??= OneNullType;
             var pTypes = (WlInterface**)Marshal.AllocHGlobal(IntPtr.Size * types.Length);
             for (var c = 0; c < types.Length; c++)
                 pTypes[c] = types[c];
-
-            return new WlMessage
-            {
-                Name = (byte*)Marshal.StringToHGlobalAnsi(name),
-                Signature = (byte*)Marshal.StringToHGlobalAnsi(signature),
-                Types = pTypes
-            };
+            Name = (byte*)Marshal.StringToHGlobalAnsi(name);
+            Signature = (byte*)Marshal.StringToHGlobalAnsi(signature);
+            Types = pTypes;
         }
+
+        private static readonly WlInterface*[] OneNullType = { null };
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -181,6 +177,16 @@ namespace NWayland.Interop
         public WlMessage* Methods;
         public int EventCount;
         public WlMessage* Events;
+
+        public WlInterface(string name, int version, WlMessage[]? methods, WlMessage[]? events)
+        {
+            Name = (byte*)Marshal.StringToHGlobalAnsi(name);
+            Version = version;
+            MethodCount = methods?.Length ?? 0;
+            Methods = UnmanagedCopy(methods);
+            EventCount = events?.Length ?? 0;
+            Events = UnmanagedCopy(events);
+        }
 
         public static WlInterface* GeneratorAddressOf(ref WlInterface s)
         {
@@ -196,16 +202,6 @@ namespace NWayland.Interop
             for (var c = 0; c < arr.Length; c++)
                 ptr[c] = arr[c];
             return ptr;
-        }
-
-        public void Init(string name, int version, WlMessage[]? methods, WlMessage[]? events)
-        {
-            Name = (byte*)Marshal.StringToHGlobalAnsi(name);
-            Version = version;
-            MethodCount = methods?.Length ?? 0;
-            Methods = UnmanagedCopy(methods);
-            EventCount = events?.Length ?? 0;
-            Events = UnmanagedCopy(events);
         }
     }
 

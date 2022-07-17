@@ -19,7 +19,7 @@ namespace NWayland.Protocols.Wayland
                 IntPtr.Zero
             };
 
-            var proxy = LibWayland.wl_proxy_marshal_array_constructor(Handle, 0, args, ref @interface);
+            var proxy = LibWayland.wl_proxy_marshal_array_constructor_versioned(Handle, 0, args, ref @interface, (uint)@interface.Version);
             return proxy == IntPtr.Zero ? null : factory.Create(proxy, version);
         }
     }

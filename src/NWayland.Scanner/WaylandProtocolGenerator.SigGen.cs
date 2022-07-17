@@ -10,7 +10,7 @@ namespace NWayland.Scanner
 {
     public partial class WaylandProtocolGenerator
     {
-        private InvocationExpressionSyntax GenerateWlMessage(WaylandProtocolMessage msg)
+        private ObjectCreationExpressionSyntax GenerateWlMessage(WaylandProtocolMessage msg)
         {
             var signature = new StringBuilder();
             if (msg.Since != 0)
@@ -41,11 +41,8 @@ namespace NWayland.Scanner
 
             }));
 
-            return InvocationExpression(
-                MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
-                    IdentifierName("WlMessage"), IdentifierName("Create")),
-                argList
-            ).WithLeadingTrivia(CarriageReturn);
+            return ObjectCreationExpression(ParseTypeName("WlMessage"), argList, null)
+                .WithLeadingTrivia(CarriageReturn);
         }
 
         private ArgumentSyntax GenerateWlMessageList(in WaylandProtocolMessage[] messages)
@@ -74,18 +71,21 @@ namespace NWayland.Scanner
             var staticCtor = ConstructorDeclaration(cl.Identifier)
                 .AddModifiers(Token(SyntaxKind.StaticKeyword));
 
-            staticCtor = staticCtor.AddBodyStatements(ExpressionStatement(InvocationExpression(
-                MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
-                    IdentifierName("WlInterface"), IdentifierName("Init")),
+            var args = ArgumentList(SeparatedList(new[]
+                {
+                    Argument(MakeLiteralExpression(@interface.Name)),
+                    Argument(MakeLiteralExpression(@interface.Version)),
+                    GenerateWlMessageList(@interface.Requests?.Cast<WaylandProtocolMessage>().ToArray() ?? Array.Empty<WaylandProtocolMessage>()),
+                    GenerateWlMessageList(@interface.Events ?? Array.Empty<WaylandProtocolMessage>())
+                }
+            ));
 
-                ArgumentList(SeparatedList(new[]
-                    {
-                        Argument(MakeLiteralExpression(@interface.Name)),
-                        Argument(MakeLiteralExpression(@interface.Version)),
-                        GenerateWlMessageList(@interface.Requests?.Cast<WaylandProtocolMessage>().ToArray() ?? Array.Empty<WaylandProtocolMessage>()),
-                        GenerateWlMessageList(@interface.Events ?? Array.Empty<WaylandProtocolMessage>())
-                    }
-                )))));
+            staticCtor = staticCtor.AddBodyStatements(
+                ExpressionStatement(AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                    MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, IdentifierName(GetWlInterfaceTypeName(@interface.Name)), IdentifierName("WlInterface")),
+                    ObjectCreationExpression(ParseTypeName("WlInterface"), args, null)
+                ))
+            );
 
             cl = cl.AddMembers(staticCtor);
 
