@@ -50,8 +50,8 @@ namespace NWayland.Scanner
             var groups = new[]
             {
                 Group("NWayland", "NWayland.Protocols", coreProtocols),
-                Group("NWayland.Protocols.Plasma", "NWayland.Protocols.Plasma",
-                    GlobPath("external", "plasma-wayland-protocols", "src", "protocols", "**/*.xml"))
+                Group("NWayland.Protocols.Plasma", "NWayland.Protocols.Plasma", GlobPath("external", "plasma-wayland-protocols", "src", "protocols", "**/*.xml")),
+                Group("NWayland.Protocols.Wlr", "NWayland.Protocols.Wlr", GlobPath("external", "wlr-protocols", "**/*.xml"))
             };
 
             var gen = new WaylandProtocolGenerator(groups, hints);

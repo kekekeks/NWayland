@@ -13,7 +13,8 @@
     </ItemGroup>
 
     <ItemGroup Label="InternalsVisibleTo">
-        <InternalsVisibleTo Include="NWayland.Protocols.Plasma, PublicKey=$(AvaloniaPublicKey)" />
+        <InternalsVisibleTo Include="NWayland.Protocols.Plasma" />
+        <InternalsVisibleTo Include="NWayland.Protocols.Wlr" />
     </ItemGroup>
 
 </Project>

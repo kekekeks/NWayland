@@ -7,3 +7,6 @@
 [submodule "external/plasma-wayland-protocols"]
 	path = external/plasma-wayland-protocols
 	url = https://github.com/KDE/plasma-wayland-protocols
+[submodule "external/wlr-protocols"]
+	path = external/wlr-protocols
+	url = https://gitlab.freedesktop.org/wlroots/wlr-protocols
