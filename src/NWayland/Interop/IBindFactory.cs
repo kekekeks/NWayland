@@ -6,6 +6,6 @@ namespace NWayland.Interop
     {
         WlInterface* GetInterface();
 
-        T Create(IntPtr handle, int version, bool isWrapper = false);
+        T Create(IntPtr handle, int version);
     }
 }

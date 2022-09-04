@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using GlobExpressions;
+using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace NWayland.Scanner
 {
@@ -29,8 +29,9 @@ namespace NWayland.Scanner
             IEnumerable<string> GlobPath(params string[] elements)
             {
                 var subRoot = GetPath(elements.SkipLast(1).ToArray());
-                var glob = Glob.Files(subRoot, elements.Last());
-                return glob.Select(x => Path.Combine(subRoot, x));
+                var matcher = new Matcher(StringComparison.OrdinalIgnoreCase);
+                matcher.AddInclude(elements.Last());
+                return matcher.GetResultsInFullPath(subRoot);
 
             }
 

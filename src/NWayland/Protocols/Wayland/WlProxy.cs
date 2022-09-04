@@ -6,14 +6,12 @@ namespace NWayland.Protocols.Wayland
     public abstract unsafe class WlProxy : IDisposable
     {
         private readonly uint _id;
-        private readonly bool _isWrapper;
 
-        protected WlProxy(IntPtr handle, int version, bool isWrapper = false)
+        protected WlProxy(IntPtr handle, int version)
         {
-            _isWrapper = isWrapper;
             Version = version;
             Handle = handle;
-            if (this is WlDisplay || _isWrapper)
+            if (this is WlDisplay)
                 return;
             _id = LibWayland.RegisterProxy(this);
         }
@@ -49,7 +47,7 @@ namespace NWayland.Protocols.Wayland
             {
                 LibWayland.wl_display_disconnect(Handle);
             }
-            else if (!_isWrapper)
+            else
             {
                 CallWaylandDestructor();
                 LibWayland.UnregisterProxy(_id);

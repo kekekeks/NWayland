@@ -90,15 +90,13 @@ namespace NWayland.Scanner
                             SeparatedList(new[]
                             {
                                 Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
-                                Parameter(Identifier("version")).WithType(ParseTypeName("int")),
-                                Parameter(Identifier("isWrapper")).WithType(ParseTypeName("bool")).WithDefault(EqualsValueClause(ParseExpression("false")))
+                                Parameter(Identifier("version")).WithType(ParseTypeName("int"))
                             }))).WithBody(Block())
                         .WithInitializer(ConstructorInitializer(SyntaxKind.BaseConstructorInitializer,
                             ArgumentList(SeparatedList(new[]
                             {
                                 Argument(IdentifierName("handle")),
-                                Argument(IdentifierName("version")),
-                                Argument(IdentifierName("isWrapper"))
+                                Argument(IdentifierName("version"))
                             }))));
                     cl = cl.AddMembers(ctor);
                 }
