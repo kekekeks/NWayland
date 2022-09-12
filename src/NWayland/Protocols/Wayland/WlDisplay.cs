@@ -30,5 +30,11 @@ namespace NWayland.Protocols.Wayland
         public int Flush() => LibWayland.wl_display_flush(Handle);
 
         public void CancelRead() => LibWayland.wl_display_cancel_read(Handle);
+
+        protected override void Dispose(bool disposing)
+        {
+            LibWayland.wl_display_disconnect(Handle);
+            base.Dispose(false);
+        }
     }
 }

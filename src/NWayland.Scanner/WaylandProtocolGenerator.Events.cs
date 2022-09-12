@@ -14,7 +14,7 @@ namespace NWayland.Scanner
             var eventInterface = InterfaceDeclaration("IEvents")
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
 
-            var dispatcherBody = Block();
+            var switchStatement= SwitchStatement(IdentifierName("opcode"));
             for (var eventIndex = 0; eventIndex < evs.Length; eventIndex++)
             {
                 var ev = evs[eventIndex];
@@ -24,7 +24,7 @@ namespace NWayland.Scanner
                 var arguments = new SeparatedSyntaxList<ArgumentSyntax>();
                 handlerParameters = handlerParameters.Add(Parameter(Identifier("eventSender"))
                     .WithType(ParseTypeName(GetWlInterfaceTypeName(@interface.Name))));
-                arguments = arguments.Add(Argument(IdentifierName("this")));
+                arguments = arguments.Add(Argument(ThisExpression()));
 
                 var eargs = ev.Arguments ?? Array.Empty<WaylandProtocolArgument>();
                 for (var argIndex = 0; argIndex < eargs.Length; argIndex++)
@@ -122,14 +122,18 @@ namespace NWayland.Scanner
 
                 eventInterface = eventInterface.AddMembers(method);
 
-                dispatcherBody = dispatcherBody.AddStatements(
-                    IfStatement(BinaryExpression(
-                            SyntaxKind.EqualsExpression, IdentifierName("opcode"), MakeLiteralExpression(eventIndex)),
-
-                        ExpressionStatement(ConditionalAccessExpression(IdentifierName("Events"),
-                            InvocationExpression(MemberBindingExpression(IdentifierName(eventName)))
-                                .WithArgumentList(ArgumentList(arguments))))
-                    ));
+                switchStatement = switchStatement.AddSections(
+                    SwitchSection(
+                        SingletonList<SwitchLabelSyntax>(
+                            CaseSwitchLabel(MakeLiteralExpression(eventIndex))),
+                        List(new StatementSyntax[]
+                        {
+                            ExpressionStatement(ConditionalAccessExpression(IdentifierName("Events"),
+                                InvocationExpression(MemberBindingExpression(IdentifierName(eventName)))
+                                    .WithArgumentList(ArgumentList(arguments)))),
+                            BreakStatement()
+                        }
+                        )));
             }
 
             cl = cl.AddMembers(eventInterface);
@@ -138,23 +142,23 @@ namespace NWayland.Scanner
                 .WithAccessorList(AccessorList(List(new[]
                 {
                     AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
-                        .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)))
                         .WithSemicolonToken(Semicolon()),
                     AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
                         .WithSemicolonToken(Semicolon())
                 })))
             );
 
-            cl = cl.AddMembers(MethodDeclaration(ParseTypeName("void"), "DispatchEvent")
+            var dispatchEvent = MethodDeclaration(ParseTypeName("void"), "DispatchEvent")
                 .WithModifiers(TokenList(Token(SyntaxKind.ProtectedKeyword), Token(SyntaxKind.OverrideKeyword)))
                 .WithParameterList(ParameterList(SeparatedList(new[]
                     {
                         Parameter(Identifier("opcode")).WithType(ParseTypeName("uint")),
                         Parameter(Identifier("arguments")).WithType(ParseTypeName("WlArgument*"))
                     }
-                )))
-                .WithBody(dispatcherBody)
-            );
+                )));
+
+            cl = cl.AddMembers(
+                dispatchEvent.WithBody(switchStatement.Sections.Count != 0 ? Block(switchStatement) : Block()));
 
             return cl;
         }

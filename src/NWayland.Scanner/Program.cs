@@ -17,9 +17,11 @@ namespace NWayland.Scanner
         private static void AutoGen()
         {
             var root = Environment.ProcessPath;
-            while (!File.Exists(Path.Combine(root, "NWayland.sln")))
+            if (root is null)
+                throw new InvalidOperationException("Unable to find base directory");
+            while (!File.Exists(Path.Join(root, "NWayland.sln")))
             {
-                root = Path.GetFullPath(Path.Combine(root, ".."));
+                root = Path.GetFullPath(Path.Join(root, ".."));
                 if (Path.GetPathRoot(root) == root)
                     throw new InvalidOperationException("Unable to find base directory");
             }
@@ -65,7 +67,7 @@ namespace NWayland.Scanner
                 foreach (var protocol in g.Protocols)
                 {
                     var generated = gen.Generate(protocol);
-                    File.WriteAllText(Path.Combine(generatedDir, $"{WaylandProtocolGenerator.Pascalize(protocol.Name)}.Generated.cs"), generated);
+                    File.WriteAllText(Path.Join(generatedDir, $"{WaylandProtocolGenerator.Pascalize(protocol.Name)}.Generated.cs"), generated);
                 }
             }
         }

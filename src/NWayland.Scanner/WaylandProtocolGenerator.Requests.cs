@@ -150,14 +150,14 @@ namespace NWayland.Scanner
 
             var marshalArgs = SeparatedList(new[]
             {
-                Argument(MemberAccess(IdentifierName("this"), "Handle")),
+                Argument(MemberAccess(ThisExpression(), "Handle")),
                 Argument(MakeLiteralExpression(index)),
                 Argument(IdentifierName("__args"))
             });
 
             if (ctorType is not null)
                 marshalArgs = marshalArgs.Add(Argument(GetWlInterfaceRefFor(ctorType)))
-                    .Add(Argument(CastExpression(ParseTypeName("uint"), MemberAccess(IdentifierName("this"), "Version"))));
+                    .Add(Argument(CastExpression(ParseTypeName("uint"), MemberAccess(ThisExpression(), "Version"))));
 
             var callExpr = InvocationExpression(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
                     IdentifierName("LibWayland"),
@@ -206,11 +206,12 @@ namespace NWayland.Scanner
 
             if (request.Type == "destructor")
                 method = method
-                    .WithIdentifier(Identifier("CallWaylandDestructor"))
-                    .WithModifiers(TokenList(
-                        Token(SyntaxKind.ProtectedKeyword),
-                        Token(SyntaxKind.SealedKeyword),
-                        Token(SyntaxKind.OverrideKeyword)
+                    .WithIdentifier(Identifier("Dispose"))
+                    .WithParameterList(ParameterList(SeparatedList(new []{ Parameter(Identifier("disposing")).WithType(ParseTypeName("bool")) })))
+                    .WithModifiers(TokenList(Token(SyntaxKind.ProtectedKeyword), Token(SyntaxKind.OverrideKeyword)))
+                    .AddBodyStatements(ExpressionStatement(
+                        InvocationExpression(MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, BaseExpression(), IdentifierName("Dispose")),
+                            ArgumentList(SeparatedList(new []{ Argument(LiteralExpression(SyntaxKind.TrueLiteralExpression)) })))
                     ));
 
             return method;
