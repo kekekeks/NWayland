@@ -82,24 +82,21 @@ namespace NWayland.Scanner
                     .AddMembers(DeclareConstant("string", "InterfaceName", MakeLiteralExpression(@interface.Name)))
                     .AddMembers(DeclareConstant("int", "InterfaceVersion", MakeLiteralExpression(@interface.Version)));
 
-                if (@interface.Name != "wl_display")
-                {
-                    var ctor = ConstructorDeclaration(cl.Identifier)
-                        .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                        .WithParameterList(ParameterList(
-                            SeparatedList(new[]
-                            {
-                                Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
-                                Parameter(Identifier("version")).WithType(ParseTypeName("int"))
-                            }))).WithBody(Block())
-                        .WithInitializer(ConstructorInitializer(SyntaxKind.BaseConstructorInitializer,
-                            ArgumentList(SeparatedList(new[]
-                            {
-                                Argument(IdentifierName("handle")),
-                                Argument(IdentifierName("version"))
-                            }))));
-                    cl = cl.AddMembers(ctor);
-                }
+                var ctor = ConstructorDeclaration(cl.Identifier)
+                    .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                    .WithParameterList(ParameterList(
+                        SeparatedList(new[]
+                        {
+                            Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
+                            Parameter(Identifier("version")).WithType(ParseTypeName("int"))
+                        }))).WithBody(Block())
+                    .WithInitializer(ConstructorInitializer(SyntaxKind.BaseConstructorInitializer,
+                        ArgumentList(SeparatedList(new[]
+                        {
+                            Argument(IdentifierName("handle")),
+                            Argument(IdentifierName("version"))
+                        }))));
+                cl = cl.AddMembers(ctor);
 
                 ns = ns.AddMembers(cl);
             }

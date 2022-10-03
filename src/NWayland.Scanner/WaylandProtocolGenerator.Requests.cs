@@ -29,8 +29,7 @@ namespace NWayland.Scanner
             if (request.Since > 0)
                 statements = statements.Add(IfStatement(
                     BinaryExpression(SyntaxKind.LessThanExpression,
-                        IdentifierName("Version"), MakeLiteralExpression(request.Since))
-                    ,
+                        IdentifierName("Version"), MakeLiteralExpression(request.Since)),
                     request.Type == "destructor"
                         ? ReturnStatement()
                         : ThrowStatement(ObjectCreationExpression(ParseTypeName("InvalidOperationException"))

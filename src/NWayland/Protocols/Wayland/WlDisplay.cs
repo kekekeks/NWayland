@@ -5,14 +5,12 @@ namespace NWayland.Protocols.Wayland
 {
     public partial class WlDisplay
     {
-        internal WlDisplay(IntPtr handle, int version) : base(handle, version) { }
-
         public static WlDisplay Connect(string? name = null)
         {
             var handle = LibWayland.wl_display_connect(name);
             if (handle == IntPtr.Zero)
                 throw new NWaylandException("Failed to connect to wayland display");
-            return new WlDisplay(handle, 1);
+            return new WlDisplay(handle, InterfaceVersion);
         }
 
         public int GetFd() => LibWayland.wl_display_get_fd(Handle);

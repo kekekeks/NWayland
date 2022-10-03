@@ -7,7 +7,7 @@ namespace NWayland.Protocols.Wayland
     {
         private readonly uint _id;
 
-        private bool _disposed;
+        private bool _isDisposed;
 
         protected WlProxy(IntPtr handle, int version)
         {
@@ -41,15 +41,19 @@ namespace NWayland.Protocols.Wayland
             DispatchEvent(opcode, arguments);
         }
 
-        public void Dispose() => Dispose(true);
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed || !disposing)
+            if (_isDisposed || !disposing)
                 return;
             LibWayland.UnregisterProxy(_id);
             LibWayland.wl_proxy_destroy(Handle);
-            _disposed = true;
+            _isDisposed = true;
         }
 
         protected static T? FromNative<T>(IntPtr proxy) where T : WlProxy => proxy == IntPtr.Zero ? null : LibWayland.FindByNative(proxy) as T;

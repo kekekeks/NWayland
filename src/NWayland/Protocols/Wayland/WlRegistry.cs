@@ -10,13 +10,13 @@ namespace NWayland.Protocols.Wayland
         {
             ref var @interface = ref *factory.GetInterface();
             if (@interface.Version < version)
-                throw new ArgumentException($"Requested version {version} of {Marshal.PtrToStringAnsi((IntPtr)@interface.Name)} is not supported by this version of NWayland. Bindings were generated for version {@interface.Version}");
+                throw new ArgumentException($"Requested version {version} of {Marshal.PtrToStringAnsi(@interface.Name)} is not supported by this version of NWayland. Bindings were generated for version {@interface.Version}");
             var args = stackalloc WlArgument[]
             {
                 name,
-                (IntPtr)@interface.Name,
+                @interface.Name,
                 version,
-                IntPtr.Zero
+                WlArgument.NewId
             };
 
             var proxy = LibWayland.wl_proxy_marshal_array_constructor_versioned(Handle, 0, args, ref @interface, (uint)@interface.Version);

@@ -22,9 +22,13 @@ namespace NWayland.Scanner
                     if (arg.AllowNull)
                         signature.Append('?');
                     if (arg.Type == WaylandArgumentTypes.NewId && arg.Interface is null)
+                    {
                         signature.Append("su");
+                        interfaceList = interfaceList.AddRange(new[] { MakeNullLiteralExpression(), MakeNullLiteralExpression() });
+                    }
+
                     signature.Append(WaylandArgumentTypes.NamesToCodes[arg.Type]);
-                    if (!string.IsNullOrWhiteSpace(arg.Interface))
+                    if (arg.Interface is not null)
                         interfaceList = interfaceList.Add(
                             GetWlInterfaceAddressFor(arg.Interface));
                     else
