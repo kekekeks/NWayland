@@ -48,23 +48,25 @@ namespace NWayland.Scanner
             if (string.IsNullOrWhiteSpace(description))
                 return member;
 
-            var nodes = description.
-                Replace("\r", string.Empty)
-                .Split('\n')
-                .Select(static line => XmlTextLiteral(line.TrimStart()))
-                .SelectMany(static l => new[]
+            var nodes = description.Replace("\r", null)
+                .Replace("\t", null)
+                .Split("\n\n")
+                .SelectMany(static paragraph =>
                 {
-                    l.Span.IsEmpty
-                        ? new XmlNodeSyntax[] { XmlEmptyElement("br"), XmlText(XmlTextNewLine("\n")), XmlEmptyElement("br") }
-                        : new XmlNodeSyntax[] { XmlText(l) },
-                    new XmlNodeSyntax[] { XmlText(XmlTextNewLine("\n")) }
+                    var lines = paragraph.Split('\n')
+                        .Select(static line => line.Trim())
+                        .Where(static line => line != string.Empty)
+                        .Select(XmlTextLiteral)
+                        .ToArray();
+                    return new[]
+                    {
+                        new XmlNodeSyntax[] { XmlText(lines) },
+                        new XmlNodeSyntax[] { XmlEmptyElement("br"), XmlEmptyElement("br"), XmlText(XmlTextNewLine("\n")) }
+                    };
                 })
-                .SelectMany(static l => l)
-                .Skip(3)
-                .SkipLast(4);
-
+                .SelectMany(static x => x)
+                .Prepend(XmlText(XmlTextNewLine("\n")));
             var summary = XmlElement("summary", List(nodes));
-
             return member.WithLeadingTrivia(TriviaList(Trivia(DocumentationComment(summary, XmlText("\n")))));
         }
 
