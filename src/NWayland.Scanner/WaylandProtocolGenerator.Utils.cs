@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -48,26 +49,18 @@ namespace NWayland.Scanner
             if (string.IsNullOrWhiteSpace(description))
                 return member;
 
-            var nodes = description.Replace("\r", null)
-                .Replace("\t", null)
-                .Split("\n\n")
-                .SelectMany(static paragraph =>
-                {
-                    var lines = paragraph.Split('\n')
-                        .Select(static line => line.Trim())
-                        .Where(static line => line != string.Empty)
-                        .Select(XmlTextLiteral)
-                        .ToArray();
-                    return new[]
-                    {
-                        new XmlNodeSyntax[] { XmlText(lines) },
-                        new XmlNodeSyntax[] { XmlEmptyElement("br"), XmlEmptyElement("br"), XmlText(XmlTextNewLine("\n")) }
-                    };
-                })
-                .SelectMany(static x => x)
-                .Prepend(XmlText(XmlTextNewLine("\n")));
-            var summary = XmlElement("summary", List(nodes));
-            return member.WithLeadingTrivia(TriviaList(Trivia(DocumentationComment(summary, XmlText("\n")))));
+            IEnumerable<SyntaxToken> tokens = description
+                .Replace("\r", "")
+                .Split('\n')
+                .Select(static line => XmlTextLiteral(line.TrimStart()))
+                .SelectMany(static l => new[] { l, XmlTextNewLine("\n") })
+                .SkipLast(1);
+
+            XmlElementSyntax summary = XmlElement("summary",
+                SingletonList<XmlNodeSyntax>(XmlText(TokenList(tokens))));
+
+            return member.WithLeadingTrivia(TriviaList(
+                Trivia(DocumentationComment(summary, XmlText("\n")))));
         }
 
         private static LiteralExpressionSyntax MakeLiteralExpression(string literal)
