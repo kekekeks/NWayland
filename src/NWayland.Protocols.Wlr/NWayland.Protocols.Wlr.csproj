@@ -1,14 +1,36 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net7.0;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>../sign.snk</AssemblyOriginatorKeyFile>
+        <PublicSign>true</PublicSign>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Version>0.0.1</Version>
+        <PackageId>NWayland.Protocols.Wlr</PackageId>
+        <Authors>kekekeks</Authors>
+        <Copyright>kekekeks</Copyright>
+        <Description>.NET Wayland bindings</Description>
+        <PackageTags>Wayland;Bindings</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/kekekeks/NWayland</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/kekekeks/NWayland</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\NWayland\NWayland.csproj" />
+        <None Include="../../README.md" Pack="true" PackagePath="/" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../NWayland/NWayland.csproj" />
     </ItemGroup>
 
 </Project>
