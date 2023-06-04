@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
         <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>../sign.snk</AssemblyOriginatorKeyFile>
+        <AssemblyOriginatorKeyFile>../../sign.snk</AssemblyOriginatorKeyFile>
         <PublicSign>true</PublicSign>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
