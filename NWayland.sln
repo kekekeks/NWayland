@@ -4,15 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWayland", "src\NWayland\NW
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWayland.Scanner", "src\NWayland.Scanner\NWayland.Scanner.csproj", "{3B179C6F-B141-4F54-B7CC-CC65A61AA418}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShmWindow", "samples\ShmWindow\ShmWindow.csproj", "{492D8069-E805-4C11-8BF5-BEFA44FCBF19}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWayland.Protocols.Plasma", "src\NWayland.Protocols.Plasma\NWayland.Protocols.Plasma.csproj", "{9E2CC7A0-ED8F-4774-B752-B7F3AB6A5DA6}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{87034747-2A5C-46C0-8686-FB3F500A3603}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EglWindow", "samples\EglWindow\EglWindow.csproj", "{63DA9366-00A2-4CE7-A853-29133DA071ED}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenGL", "samples\OpenGL\OpenGL.csproj", "{5B4E5864-FE60-4A0C-86E8-003063A2D605}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NWayland.Protocols.Wlr", "src\NWayland.Protocols.Wlr\NWayland.Protocols.Wlr.csproj", "{937AF8A5-88A1-405B-9C1F-167B1AC860F3}"
 EndProject
@@ -22,9 +14,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{492D8069-E805-4C11-8BF5-BEFA44FCBF19} = {87034747-2A5C-46C0-8686-FB3F500A3603}
-		{63DA9366-00A2-4CE7-A853-29133DA071ED} = {87034747-2A5C-46C0-8686-FB3F500A3603}
-		{5B4E5864-FE60-4A0C-86E8-003063A2D605} = {87034747-2A5C-46C0-8686-FB3F500A3603}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{4B817FC0-BD74-4BC4-99CE-6B4D4D393B39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -35,22 +24,10 @@ Global
 		{3B179C6F-B141-4F54-B7CC-CC65A61AA418}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B179C6F-B141-4F54-B7CC-CC65A61AA418}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B179C6F-B141-4F54-B7CC-CC65A61AA418}.Release|Any CPU.Build.0 = Release|Any CPU
-		{492D8069-E805-4C11-8BF5-BEFA44FCBF19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{492D8069-E805-4C11-8BF5-BEFA44FCBF19}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{492D8069-E805-4C11-8BF5-BEFA44FCBF19}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{492D8069-E805-4C11-8BF5-BEFA44FCBF19}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9E2CC7A0-ED8F-4774-B752-B7F3AB6A5DA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9E2CC7A0-ED8F-4774-B752-B7F3AB6A5DA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E2CC7A0-ED8F-4774-B752-B7F3AB6A5DA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E2CC7A0-ED8F-4774-B752-B7F3AB6A5DA6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{63DA9366-00A2-4CE7-A853-29133DA071ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{63DA9366-00A2-4CE7-A853-29133DA071ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{63DA9366-00A2-4CE7-A853-29133DA071ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{63DA9366-00A2-4CE7-A853-29133DA071ED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5B4E5864-FE60-4A0C-86E8-003063A2D605}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B4E5864-FE60-4A0C-86E8-003063A2D605}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B4E5864-FE60-4A0C-86E8-003063A2D605}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B4E5864-FE60-4A0C-86E8-003063A2D605}.Release|Any CPU.Build.0 = Release|Any CPU
 		{937AF8A5-88A1-405B-9C1F-167B1AC860F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{937AF8A5-88A1-405B-9C1F-167B1AC860F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{937AF8A5-88A1-405B-9C1F-167B1AC860F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
