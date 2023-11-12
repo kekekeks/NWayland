@@ -14,6 +14,8 @@ namespace NWayland.Scanner
                 {
                     // Predates unstable naming scheme and causes conflicts with the stable one
                     "xdg_shell_unstable_v5",
+                    // Marked as stable
+                    "linux_dmabuf_unstable_v1",
                     // Protocols have more than one method marked as their destructor
                     "drm_lease_v1",
                     "ext_session_lock_v1"

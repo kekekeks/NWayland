@@ -34,7 +34,6 @@ namespace NWayland.Scanner
                 var matcher = new Matcher(StringComparison.OrdinalIgnoreCase);
                 matcher.AddInclude(elements.Last());
                 return matcher.GetResultsInFullPath(subRoot);
-
             }
 
             var coreProtocols = new List<string> { GetPath("external", "wayland", "protocol", "wayland.xml") };
