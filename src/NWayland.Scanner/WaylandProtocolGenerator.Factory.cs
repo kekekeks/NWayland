@@ -1,21 +1,21 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-namespace NWayland.CodeGen
+
+namespace NWayland.Scanner
 {
     public partial class WaylandProtocolGenerator
     {
-        ClassDeclarationSyntax WithFactory(ClassDeclarationSyntax cl, WaylandProtocolInterface iface)
+        private ClassDeclarationSyntax WithFactory(ClassDeclarationSyntax cl, WaylandProtocolInterface @interface)
         {
-            if (iface.Name == "wl_display" || iface.Name == "wl_registry")
-                return cl;
-            var factoryInterfaceType = ParseTypeName("IBindFactory<" + cl.Identifier.Text + ">");
+            var factoryInterfaceType = ParseTypeName($"IBindFactory<{cl.Identifier.Text}>");
             var fac = ClassDeclaration("ProxyFactory")
+                .WithModifiers(TokenList(Token(SyntaxKind.PrivateKeyword)))
                 .AddBaseListTypes(SimpleBaseType(factoryInterfaceType))
                 .AddMembers(MethodDeclaration(
                         ParseTypeName("WlInterface*"), "GetInterface")
                     .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-                    .WithBody(Block(ReturnStatement(GetWlInterfaceAddressFor(iface.Name))))
+                    .WithBody(Block(ReturnStatement(GetWlInterfaceAddressFor(@interface.Name))))
                 )
                 .AddMembers(MethodDeclaration(
                         ParseTypeName(cl.Identifier.Text), "Create")
@@ -23,19 +23,18 @@ namespace NWayland.CodeGen
                     .WithParameterList(ParameterList(SeparatedList(new[]
                     {
                         Parameter(Identifier("handle")).WithType(ParseTypeName("IntPtr")),
-                        Parameter(Identifier("version")).WithType(ParseTypeName("int")),
-                        Parameter(Identifier("display")).WithType(ParseTypeName("WlDisplay")),
+                        Parameter(Identifier("version")).WithType(ParseTypeName("int"))
                     })))
                     .WithBody(Block(ReturnStatement(
                         ObjectCreationExpression(ParseTypeName(cl.Identifier.Text))
                             .WithArgumentList(ArgumentList(SeparatedList(new[]
                             {
                                 Argument(IdentifierName("handle")),
-                                Argument(IdentifierName("version")),
-                                Argument(IdentifierName("display"))
+                                Argument(IdentifierName("version"))
                             })))
                     )))
                 );
+
             cl = cl
                 .AddMembers(fac)
                 .AddMembers(PropertyDeclaration(factoryInterfaceType, "BindFactory")
@@ -48,6 +47,7 @@ namespace NWayland.CodeGen
 
                     )).WithSemicolonToken(Semicolon())
                 );
+
             return cl;
         }
     }

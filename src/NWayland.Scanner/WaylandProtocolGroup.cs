@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 
-namespace NWayland.CodeGen
+namespace NWayland.Scanner
 {
     public class WaylandProtocolGroup
     {
-        public string Assembly { get; set; }
-        public string Namespace { get; set; }
-        public List<WaylandProtocol> Protocols { get; set; } = new List<WaylandProtocol>();
+        public string Assembly { get; }
+        public string Namespace { get; }
+        public List<WaylandProtocol> Protocols { get; set; } = new();
 
         public WaylandProtocolGroup(string assembly, string ns)
         {

@@ -13,7 +13,7 @@
 
     <PropertyGroup>
         <Version>0.0.1</Version>
-        <PackageId>NWayland.Protocols.Wlr</PackageId>
+        <PackageId>NWayland.Protocols.Plasma</PackageId>
         <Authors>kekekeks</Authors>
         <Copyright>kekekeks</Copyright>
         <Description>.NET Wayland bindings</Description>

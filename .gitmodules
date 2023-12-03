@@ -1,12 +1,12 @@
 [submodule "external/wayland"]
 	path = external/wayland
-	url = https://github.com/wayland-project/wayland.git
-[submodule "external/kwayland"]
-	path = external/kwayland
-	url = https://github.com/KDE/kwayland.git
+	url = https://gitlab.freedesktop.org/wayland/wayland.git
 [submodule "external/wayland-protocols"]
 	path = external/wayland-protocols
-	url = https://github.com/wayland-project/wayland-protocols.git
+	url = https://gitlab.freedesktop.org/wayland/wayland-protocols.git
+[submodule "external/plasma-wayland-protocols"]
+	path = external/plasma-wayland-protocols
+	url = https://invent.kde.org/libraries/plasma-wayland-protocols.git
 [submodule "external/wlr-protocols"]
 	path = external/wlr-protocols
-	url = https://github.com/swaywm/wlr-protocols.git
+	url = https://gitlab.freedesktop.org/wlroots/wlr-protocols.git

@@ -8,11 +8,11 @@ namespace NWayland.Interop
     public class NWaylandMarshalledString : SafeHandle
     {
         private GCHandle _gcHandle;
-        private byte[] _data;
+        private byte[]? _data;
 
-        public NWaylandMarshalledString(string s) : base(IntPtr.Zero, true)
+        public NWaylandMarshalledString(string? s) : base(IntPtr.Zero, true)
         {
-            if (s == null)
+            if (s is null)
                 return;
             var len = Encoding.UTF8.GetByteCount(s);
             _data = ArrayPool<byte>.Shared.Rent(len + 1);
@@ -22,24 +22,18 @@ namespace NWayland.Interop
             handle = _gcHandle.AddrOfPinnedObject();
         }
 
-        public int ByteLen => _data.Length;
+        public override bool IsInvalid => false;
 
         protected override bool ReleaseHandle()
         {
-            if (handle != IntPtr.Zero)
-            {
-                handle = IntPtr.Zero;
-                if (_data != null)
-                    ArrayPool<byte>.Shared.Return(_data);
-                _data = null;
-                _gcHandle.Free();
-            }
-
+            if (handle == IntPtr.Zero)
+                return true;
+            handle = IntPtr.Zero;
+            if (_data is not null)
+                ArrayPool<byte>.Shared.Return(_data);
+            _data = null;
+            _gcHandle.Free();
             return true;
         }
-
-        public override bool IsInvalid => false;
-
     }
-
 }
